@@ -1,0 +1,181 @@
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" Content="Microsoft Visual Studio">
+<TITLE>Wyrd Design Document</TITLE>
+</HEAD>
+<BODY>
+
+<div>
+    <h1>
+        The Wyrd Narrative Scripting Language
+    </h1>
+    <h3>
+        By Will Nations
+    </h3>
+    <p>
+    Wyrd is a narrative scripting language designed to allow users to compose
+    information regarding narrative entities and sequences of events. The 
+    targeted use cases for Wyrd are the following.
+    </p>
+</div>
+
+<div>
+    <ul>
+        <li>
+            Describe properties of narrative entities in a narrative sense.
+            <ul>
+                <li>Characters</li>
+                <li>Objects</li>
+                <li>Places</li>
+                <li>Lore/Ideas</li>
+            </ul>
+        </li>
+        <li>
+            Deserialize Wyrd into data for different languages so that the
+            information can be converted to text and back. 3rd party
+            applications may then implement their own methods of drawing
+            on their version of the deserialized Wyrd data. The language
+            must also therefore be simple enough that it can easily be
+            serialized back into Wyrd text from any given language's data.
+        </li>
+        <li>
+            Generate events from Wyrd statements that rely on and edit the
+            aforementioned data. 3rd party applications may then subscribe
+            to those events to in turn react to Wyrd scripting.
+        </li>
+        <li>
+            Wyrd must be capable of being used in ordinary dialogue speech,
+            just as if it were a natural language. This is to ensure that
+            one need not speak in a traditionally "programmatic" manner
+            in order to communicate properly with a computer. This will in
+            turn allow applications relaying on Wyrd to have AI personas
+            that can react personally with their own clearly understanable 
+            Wyrd speech.
+        </li>
+    </ul>
+</div>
+
+<div>
+    To accomplish all of that, Wyrd shall need the following objects:
+    <br />
+    <ol>
+        <li>
+            <p>
+                Lexicon
+            </p>
+
+            <p>
+                It must ultimately be able to...
+                <ul>
+                    <li>
+                        Pick out the individual words and punctuation in a 
+                        stream of Wyrd text.
+                    </li>
+                    <li>
+                        Identify the syntactic relationship between words
+                        and punctuation in a stream of Wyrd text.
+                    </li>
+                    <li>
+                        Alert the Wyrd App when an unrecognized input is
+                        detected, either due to unknown vocabulary or
+                        confusing syntax discrepancies.
+                    </li>
+                </ul>
+            </p>
+
+            <p>
+                The method by which the Lexicon shall operate is by 
+                managing two distinct libraries of words, the "Core" and 
+                the "Custom" words.
+            </p>
+
+            <ul>
+                <li>
+                    Core words are understood to be the basis upon which 
+                    all other words are defined and understood. There must 
+                    be few enough of these Core words that they can be 
+                    learned quite easily by the average user. That is, they 
+                    should not number anywhere beyond 150, if possible. 
+                    This Core set will include both regular terms and those 
+                    that serve only a functional purpose, grammatically 
+                    speaking.
+                </li>
+                <li>
+                    Custom words are terms that have been specially 
+                    introduced by users and communities. All custom words 
+                    are to be used as adjectives of nouns or adverbs of 
+                    verbs. That is, they will never stand alone, but 
+                    instead will be syntactically recognized only by the 
+                    things which they further describe.
+                </li>
+                <li>
+                    Core words will be accessed in a read-only dictionary.
+                    If a word is not marked as a Custom word, and if it
+                    cannot be located in the Core dictionary, then an
+                    exception will be thrown, alerting the Wyrd App that
+                    an unrecognized input was encountered.
+                </li>
+                <li>
+                    Custom words will be accessed in a read-write dictionary.
+                    If a word is marked as a Custom word, then the Custom
+                    dictionary will be scanned for the Custom word. If found,
+                    the dictionary will simply return all information
+                    associated with the custom term. If not, then a new entry
+                    will be made in the current Custom dictionary and all 
+                    applicable information will be drawn from the incoming
+                    Wyrd text stream and added to the dictionary's entry.
+                </li>
+            </ul>
+
+            <p>
+                Ideally, each "version" of Wyrd would include the same set of
+                Core words. Each individual client application that makes use
+                of the Wyrd App would in turn include their own Custom
+                dictionary for terms relevant to its own application.
+            </p>
+
+            <p>
+                Given these specifications, the Lexicon can be used to
+                accomplish the following tasks:
+            </p>
+
+            <ul>
+                <li>
+                    Verify that a given input stream contains only the
+                    appropriate Core words and that all non-Core words are
+                    properly marked as Custom, i.e. throw alerts for unmarked
+                    non-Core terms.
+                </li>
+                <li>
+                    Generate a graph of the syntactic structure of the Wyrd
+                    text.
+                </li>
+            </ul>
+
+            <p>
+                With this graph of information, the data can then be handed off
+                to more specialized classes that are devoted to identifying
+                the semantics involved in the syntactic structure and
+                vocabulary contained within the Wyrd text presented.
+            </p>
+            <p>
+                The question then to be posed is what exact format should this
+                graph of information have when deserialized into data?
+            </p>
+            <ul>
+                <li>
+                    A class that has, among other things, a map of the words
+                    sorted by their role within the sentence. There is also
+                    additional information associated with each, based on their
+                    role. For example, nouns will have a list of all modifying
+                    adjectives while adjectives will likewise have a list of
+                    modifying adverbs as well as which noun they modify, etc.
+                </li>
+            </ul>
+        </li>
+    </ol>
+</div>
+
+
+</BODY>
+</HTML>
