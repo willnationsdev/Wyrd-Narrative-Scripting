@@ -14,7 +14,8 @@ a reasonable breadth and depth for discussing concepts using normal dialogue. To
 stories and broaden the linguistic capabilities of the language by adding a few syntax rules and increasing the existing vocabulary.
 I am writing the program in C++.
 
-To follow along with blog posts concerning the project, visit www.willnationsdev.wordpress.com.
-To view Twitch streams published for the project, please follow me at www.twitch.tv/willnationsdev
+To follow along with blog posts concerning the project, visit https://willnationsdev.wordpress.com/
+To view Twitch streams published for the project, please follow me at https://www.twitch.tv/willnationsdev
+For more information on Toki Pona, the artifical language, visit http://tokipona.net/tp/janpije/okamasona.php
 
 Current Status: Designing Syntax Rules for Toki Sona and Programming a Toki Sona Parser
