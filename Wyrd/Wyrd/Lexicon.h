@@ -30,6 +30,7 @@
 #include <fstream>
 #include <exception>
 #include <vector>
+#include "Syntax.h"
 
 #define LEX_STR_LENGTH 24
 

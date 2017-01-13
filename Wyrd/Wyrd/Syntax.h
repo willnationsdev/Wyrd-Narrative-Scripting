@@ -98,15 +98,9 @@ namespace wyrd {
     };
 
     /*
-     * A basic organizational unit for a Wyrd statement. Includes one dependent
-     * phrase (optionally) and then one independent phrase (required). 
-     */
-    class Sentence {
-        
-    };
-
-    /*
-     *
+     * A class responsible for reading in a set of syntax rules. Given a
+     * Sentence object, it can return whether that particular Sentence has
+     * proper syntax or not.
      */
     class Syntax {
         std::ifstream mSyntaxFile;

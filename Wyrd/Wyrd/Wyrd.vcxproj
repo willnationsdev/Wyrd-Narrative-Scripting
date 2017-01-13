@@ -118,6 +118,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Lexicon.h" />
+    <ClInclude Include="Syntax.h" />
+    <ClInclude Include="WyrdGraph.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="driver.cpp" />
+    <ClCompile Include="Lexicon.cpp" />
+    <ClCompile Include="WyrdGraph.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="dictionary.txt" />
+    <Text Include="TokiSonaFeatures.txt" />
+    <Text Include="syntax.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DesignDocument.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
