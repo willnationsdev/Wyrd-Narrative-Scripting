@@ -6,31 +6,31 @@ use in stories will be known as Toi Sona ("The Story|Knowledge Language").
 
 The language features of Toki Sona that separate it from Toki Pona include...
 
-- Words that are used as adjectives for nouns and adverbs for verbs must be
+1. Words that are used as adjectives for nouns and adverbs for verbs must be
   hyphenated and attached to the noun/verb in question.
   Example: tomo-tawa 
-  Trans:   "car", lit. a [moving] [enclosed space]
+  Trans: "car" (a moving enclosed space)
 
-- The "en" usage limit is escalated from tying 3 concepts together to having
+2. The "en" usage limit is escalated from tying 3 concepts together to having
   no such restriction.
   Example: ona pi ma en ona en sina en mi en ali li wile moku.
   Trans: The people of Earth and him/her and you and me and everyone wants to eat.
 
-- To enhance the noun modifier "pi" that is used to tie 2 noun concepts
+3. To enhance the noun modifier "pi" that is used to tie 2 noun concepts
   together, for example, suwi-telo pi kon-lete (lit. "sweet fluid of cold air",
   e.g. hot chocolate), we will now be able to "en" multiple pi's together like:
   [noun pi something en pi something]
   Example: tomo-telo ni li jo supa-telo pi kiwen-jelo en pi telo-tawa-nanpa!
   Trans: That bathroom has golden toilets with electronically sprayed water!
 
-- To enable adjective phrases to be used to describe a noun or in order to
+4. To enable adjective phrases to be used to describe a noun or in order to
   compare verbs to each other, I am adding the grammar particle "po". It 
   functions exactly like the way "pi" does, only the target of "pi" must be a
   noun while the target of "po" must be a verb.
   Example: ona po pali lon tenpo-suno li jo ali pona-suli.
   Trans: People that work during the day have a much better life.
 
-- Toki Pona has no proper nouns, only proper adjectives. These are accomplished
+5. Toki Pona has no proper nouns, only proper adjectives. These are accomplished
   by invoking Custom words (manual words added to the core language) as
   descriptors for Core nouns. This becomes a problem, however, when the name of
   something itself spans multiple words, for example "Eiffel Tower".
@@ -40,6 +40,27 @@ The language features of Toki Sona that separate it from Toki Pona include...
   UpperCamelCase for the programmers reading this.
   Example: tomo-EiffelTower li suli-mute!
   trans: The Eiffel Tower is huge!
+  
+6a. To allow additional layers of description, I am adding a syntax rule that 
+  allows "pi" to target not just nouns, but a noun phrase (which itself can
+  have a single additional level of "pi"). So, something matching the form...
+  [noun1 pi noun2 pi noun3] where noun3 describes noun2 which then describes
+  noun1.
+  Example: ona-suli pi tomo-tawa pi moni-mute
+  Trans: The big person of the very expensive cars (The big guy who has swanky cars)
+  vs.
+  Example: ona-suli pi tomo-tawa en pi moni-mute
+  Trans: The big person of the cars and of wealth (The big guy with tons of money and cars)
+   
+6b. To maintain clarity with #3/#4 in combination with these nested "pi" phrases,
+  we will also need to mandate that, when returning from such nested phrases to
+  combine with an "en", "en pi" or "en po" phrase, you'll need to include a comma
+  to separate the nested statement from the original one.
+  Example: ona-suli pi tomo-tawa pi moni-mute, en po lon poka pi tomo-moni
+  Trans:  The big guy of the very expensive cars who lives next to the bank
+  vs.
+  Example: ona-suli pi tomo-tawa pi moni-mute po lon poka pi tomo-moni
+  Trans: The big guy of the very expensive cars that are parked next to the bank
 
 Samples in this document will follow the form:
 1. Plain English
