@@ -17,37 +17,31 @@ namespace wyrd
 
 #pragma region Exceptions
 
-    const char* WyrdException::what() const
-    {
-        return (std::string(getBaseMessage()) + '\n' +
-            mcpMessage).c_str();
-    }
-
 #pragma endregion
 
 #pragma region Lexicon
 
 #pragma region Lexicon Constants
 
-    const char Lexicon::MorphologyStrings::mscaPeriod[] = { "." };
-    const char Lexicon::MorphologyStrings::mscaColonAccent[] = { ":\'" };
-    const char Lexicon::MorphologyStrings::mscaQuestionExclamation[] = { "?!" };
-    const char Lexicon::MorphologyStrings::mscaPairedLetters[] = { "ptksmljw" };
-    const char Lexicon::MorphologyStrings::mscaVowels[] = { "aeiou" };
-    const char Lexicon::MorphologyStrings::mscaN[] = { "n" };
-    const char Lexicon::MorphologyStrings::mscaWhitespace[] = { " \n\t" };
-    const char Lexicon::MorphologyStrings::mscaAfterPeriod[] = { ".?! \n\t" };
-    const char Lexicon::MorphologyStrings::mscaAfterColorAccent[] = { " \n\t" };
+    const char Lexicon::MorphologyStrings::PERIOD[] = { "." };
+    const char Lexicon::MorphologyStrings::COLON_ACCENT[] = { ":\'" };
+    const char Lexicon::MorphologyStrings::QUESTION_EXCLAMATION[] = { "?!" };
+    const char Lexicon::MorphologyStrings::PAIRED_LETTERS[] = { "ptksmljw" };
+    const char Lexicon::MorphologyStrings::VOWELS[] = { "aeiou" };
+    const char Lexicon::MorphologyStrings::N[] = { "n" };
+    const char Lexicon::MorphologyStrings::WHITESPACE[] = { " \n\t" };
+    const char Lexicon::MorphologyStrings::AFTER_PERIOD[] = { ".?! \n\t" };
+    const char Lexicon::MorphologyStrings::AFTER_COLON_ACCENT[] = { " \n\t" };
     const char Lexicon::
-        MorphologyStrings::mscaAfterQuestionExclamation[] = { "?! \n\t" };
+        MorphologyStrings::AFTER_QUESTION_EXCLAMATION[] = { "?! \n\t" };
     const char Lexicon::
-        MorphologyStrings::mscaAfterPairedLetters[] = { "aeiou" };
+        MorphologyStrings::AFTER_PAIRED_LETTERS[] = { "aeiou" };
     const char Lexicon::
-        MorphologyStrings::mscaAfterVowels[] = { ",.!?\': \n\tptksmnljw" };
+        MorphologyStrings::AFTER_VOWELS[] = { ",.!?\': \n\tptksmnljw" };
     const char Lexicon::
-        MorphologyStrings::mscaAfterN[] = { ",.!?\': \n\tptksmljwaeiou" };
+        MorphologyStrings::AFTER_N[] = { ",.!?\': \n\tptksmljwaeiou" };
     const char Lexicon::
-        MorphologyStrings::mscaAfterWhitespace[] = { " \n\t.!?ptksmnljwaeiou" };
+        MorphologyStrings::AFTER_WHITESPACE[] = { " \n\t.!?ptksmnljwaeiou" };
 
 #pragma endregion
 
@@ -73,6 +67,7 @@ namespace wyrd
                 std::string(acpCustomDictionaryFileName) +
                 "\" could not be opened.");
         }
+
     }
 #pragma endregion
 
@@ -85,20 +80,29 @@ namespace wyrd
 
 #pragma region Lexical Analyzer Methods
 
-    void Lexicon::verify(std::istream &arTextStream) const
+    void Lexicon::verify(std::istream &aTextStream) const
     {
         //Confirm Morphology
-        checkMorphology(arTextStream);
+        checkMorphology(aTextStream);
     }
 
-    void Lexicon::checkMorphology(std::istream &arTextStream) const
+    void Lexicon::checkMorphology(std::istream &aTextStream) const
     {
-        
+        std::string buffer;
+        while (std::getline(aTextStream, buffer))
+        {
+
+        }
     }
 
+    /*
+     * tokenize
+     * 
+     * @param acrInput const string&
+     */
     template<typename IPushBackable>
-    void Lexicon::tokenize(string const& acrInput, char const* acpDelims, 
-        IPushBackable& arData)
+    void Lexicon::tokenize(std::string const& aInput, char const* aDelims, 
+        IPushBackable& aData)
     {
         /*
          * The following code was excerpted from the following web link more

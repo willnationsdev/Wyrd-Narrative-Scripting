@@ -2,25 +2,7 @@
  *
  */
 #include <iostream>
-#include "TokiPona.h"
-
-namespace tp = tokipona;
-
-namespace tokipona
-{
-    void printVerification(const wyrd::Lexicon &acrLexicon, std::istream& arInput)
-    {
-        try
-        {
-            acrLexicon.verify(arInput);
-        }
-        catch (const wyrd::Lexicon::LexicalException &acrException)
-        {
-            std::cout << acrException.what() << std::endl;
-            std::exit(1);
-        }
-    }
-}
+#include "Lexicon.h"
 
 int main(int argc, char** argv)
 {

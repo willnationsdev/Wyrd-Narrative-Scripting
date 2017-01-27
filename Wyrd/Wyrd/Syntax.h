@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include "Common.h"
 
 namespace wyrd {
 
@@ -103,6 +104,26 @@ namespace wyrd {
      * proper syntax or not.
      */
     class Syntax {
+    public:
+        Syntax(const std::string& pSyntaxFileName = DEFAULT_SYNTAX_FILENAME);
+
+        DefineException(SyntacticException, WyrdException)
+        DefineException(SyntaxFileNotFoundException, SyntacticException)
+    private:
+        /*
+         * The stream from which all syntax information is defined.
+         */
         std::ifstream mSyntaxFile;
+
+        /*
+         * The name of the syntax file.
+         */
+        std::string mSyntaxFilename;
+
+#pragma region Constants
+
+        static const char DEFAULT_SYNTAX_FILENAME[];
+
+#pragma endregion
     };
 }

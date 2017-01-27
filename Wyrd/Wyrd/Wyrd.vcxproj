@@ -118,6 +118,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common.h" />
     <ClInclude Include="Lexicon.h" />
     <ClInclude Include="Syntax.h" />
     <ClInclude Include="WyrdGraph.h" />
@@ -125,6 +126,7 @@
   <ItemGroup>
     <ClCompile Include="driver.cpp" />
     <ClCompile Include="Lexicon.cpp" />
+    <ClCompile Include="Syntax.cpp" />
     <ClCompile Include="WyrdGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
