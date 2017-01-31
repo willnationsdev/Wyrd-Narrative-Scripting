@@ -1,12 +1,19 @@
-saku
-n. lack of stability, entropy, constant motion
+saku, opposite of awen
+n. instability, entropy
+n. that which is in constant motion
 n. doubt
 adj. shaking, oscillating
 adj. unstable
-v.t. to doubt something
-v.t. shake
-v.i. oscillate, reverberate
-adv. to do something tenuously, temporarily
+adj. doubtful, untrustworthy
+vt. to doubt something
+vt. shake
+vi. oscillate, reverberate
+adv. to do something tenuously
 adv. to do something in constant flux, e.g. assuming "Date" is a custom word, speed dating would be "pali-saku e pali-Date"
 
-
+ume
+n. design
+adj. designed, planned
+vt. to design
+vt. create (in an abstract way)
+Ex. ume-sewi: lit. "The superior's design" => Fate, Destiny, God's Plan, etc.
