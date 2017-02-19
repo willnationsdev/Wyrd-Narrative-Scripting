@@ -114,4 +114,17 @@ namespace wyrd
     };
 #pragma endregion
 
+
+#pragma region Enumerations
+
+    enum class DocumentSection {
+        null,
+        Document,
+        Paragraph,
+        Sentence,
+        Word,
+        WordComponent
+    };
+
+#pragma endregion
 }

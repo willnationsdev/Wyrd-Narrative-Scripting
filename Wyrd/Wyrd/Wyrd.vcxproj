@@ -118,16 +118,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AggregateStreamVerifier.h" />
+    <ClInclude Include="WyrdNodes.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="IAggregateVerifier.h" />
+    <ClInclude Include="IParser.h" />
+    <ClInclude Include="IVerifier.h" />
+    <ClInclude Include="IWyrdNode.h" />
+    <ClInclude Include="LexicalVerifier.h" />
     <ClInclude Include="Lexicon.h" />
     <ClInclude Include="Syntax.h" />
+    <ClInclude Include="ITextOwner.h" />
+    <ClInclude Include="WyrdParser.h" />
     <ClInclude Include="WyrdGraph.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AggregateStreamVerifier.cpp" />
+    <ClCompile Include="BaseWyrdNode.cpp" />
     <ClCompile Include="driver.cpp" />
+    <ClCompile Include="LexicalVerifier.cpp" />
     <ClCompile Include="Lexicon.cpp" />
     <ClCompile Include="Syntax.cpp" />
     <ClCompile Include="WyrdGraph.cpp" />
+    <ClCompile Include="WyrdNodes.cpp" />
+    <ClCompile Include="WyrdParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="dictionary.txt" />

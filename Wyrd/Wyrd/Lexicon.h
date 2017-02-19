@@ -11,20 +11,15 @@
  * Specializations:
  * - i: I-teration: a Stack variable that is specifically used for iterations.
  * - t: T-emporary: a Stack variable that is specifically used for temp values.
- *
- * Prefixing Examples:
- * - acrVar  => variable Var passed into function as const reference.
- * - mpVar   => variable Var is a member variable and pointer value.
- * - scppVar => variable Var is allocated on the stack, a const pointer to 
- *              another pointer.
  */
 
 #pragma once
 #include <fstream>
 #include <exception>
 #include <vector>
-#include "Syntax.h"
+#include <atomic>
 #include "Common.h"
+#include "IVerifier.h"
 
 #define LEX_STR_LENGTH 24
 
@@ -34,7 +29,7 @@ namespace wyrd
 
 #pragma endregion
 
-    class Lexicon
+    class Lexicon : public IVerifier<std::istream>
     {
     public:
 
@@ -44,17 +39,20 @@ namespace wyrd
          * dictionary will be read and possibly written to (in the case that
          * new information about a custom term is developed during execution).
          * 
-         * @params pCoreDictionaryFileName
+         * TODO: Replace hard-coded dictionary paths with outsourcing from a
+         *       config file parser.
+         * 
+         * @param pCoreDictionaryFileName
          *     - A file name for the dictionary detailing the core Lexicon
          *     - language and syntax.
-         * @params pCustomDictionaryFileName
+         * @param pCustomDictionaryFileName
          *     - A file name for the dictionary detailing Custom terms and
          *     - their meanings as described by the Core terms.
          * @throws Lexicon::DictionaryNotFoundException
          *     - If a dictionary file is not found locally.
          */
-        Lexicon(const char* pCoreDictionaryFileName = "core_dictionary.txt", 
-            const char* pCustomDictionaryFileName = "custom_dictionary.txt");
+        Lexicon(std::string pCoreDictionaryFileName = "core_dictionary.txt", 
+            std::string pCustomDictionaryFileName = "custom_dictionary.txt");
 
         /*
          * Default Destructor
@@ -64,16 +62,16 @@ namespace wyrd
         /*
          * Verifies that the words and punctuation used in a sentence conform
          * to the proper lexical structure. Verifies these points of data:
-         * - Morphology: The Core words are known words in the Core dictionary.
-         * - Syntax: The full sentence conforms to approved grammatical forms.
+         * - Morphology:
+         *      "Core"-marked words can be found in the Core dictionary.
          * 
-         * @params pTextStream
+         * @param pTextStream
          *      - The text to be verified as Toki Pona.
          * @throws Lexicon::UnrecognizedCoreTextException
          *      - if a scanned word is not marked as a custom word and is not
          *        found in the dictionary reference
          */
-        void verify(std::istream &pTextStream) const;
+        bool verify(std::istream *pTextStream) override;
 
 #pragma region Exceptions
         DefineException(LexicalException, WyrdException)
@@ -89,35 +87,20 @@ namespace wyrd
     protected:
 
         /*
-         * Confirms that the content of arTextStream is composed solely of 
-         * TokiPona vocabulary.
+         * Confirms that the content of TextStream is composed solely of 
+         * TokiSona vocabulary.
          * 
-         * @param arTextStream
+         * @param pTextStream
          *      - The stream supplying the text to be evaluated.
          */
-        void checkMorphology(std::istream &arTextStream) const;
+        bool checkMorphology(std::istream *pTextStream);
 
     private:
-        /* 
-         * The stream reading information from the Core dictionary.
-         * Informs the Lexicon which words are permitted during morphological
-         * analysis.
-         */
+        // Read-only stream for the Core dictionary.
         std::ifstream mCoreDictionaryFile;
 
-        /* 
-         * The stream providing read and write access to the Custom dictionary.
-         * Informs the Lexicon which words are known during morphological
-         * analysis. Words marked as custom that are NOT known are added
-         * to the Custom dictionary.
-         */
+        // Read-Write stream for the Custom dictionary.
         std::fstream mCustomDictionaryFile;
-
-        /*
-         * The stream providing read information about the list of grammar
-         * rules that must be followed.
-         */
-        Syntax mSyntax;
 
         /*
          * The current line number, useful for error reporting.
@@ -201,6 +184,16 @@ namespace wyrd
          * The rate at which the Lexicon will read from its input streams.
          */
         static const unsigned int READ_RATE = BUFSIZ;
+
+        /*
+         *
+         */
+        static const char* DEFAULT_CORE_DICTIONARY_FILENAME;
+
+        /*
+         *
+         */
+        static const char* DEFAULT_CUSTOM_DICTIONARY_FILENAME;
 
 #pragma endregion
 

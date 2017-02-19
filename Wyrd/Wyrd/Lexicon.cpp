@@ -23,6 +23,7 @@ namespace wyrd
 
 #pragma region Lexicon Constants
 
+    /* Need to move all of this into a config file or something? */
     const char Lexicon::MorphologyStrings::PERIOD[] = { "." };
     const char Lexicon::MorphologyStrings::COLON_ACCENT[] = { ":\'" };
     const char Lexicon::MorphologyStrings::QUESTION_EXCLAMATION[] = { "?!" };
@@ -47,27 +48,28 @@ namespace wyrd
 
 #pragma region Lexicon Constructors
 
-    Lexicon::Lexicon(const char* acpCoreDictionaryFileName, 
-        const char* acpCustomDictionaryFileName)
+    Lexicon::Lexicon(std::string aCoreDictionaryFileName, 
+        std::string aCustomDictionaryFileName)
     {
-        mCoreDictionaryFile.open(acpCoreDictionaryFileName);
+        mCoreDictionaryFile.open(aCoreDictionaryFileName);
         if (!mCoreDictionaryFile.is_open())
         {
             throw CoreDictionaryNotFoundException(
                 "The Core Dictionary with file name \"" + 
-                std::string(acpCoreDictionaryFileName) + 
+                std::string(aCoreDictionaryFileName) + 
                 "\" could not be opened.");
         }
 
-        mCustomDictionaryFile.open(acpCustomDictionaryFileName);
+        mCustomDictionaryFile.open(aCustomDictionaryFileName);
         if (!mCustomDictionaryFile.is_open())
         {
             throw CustomDictionaryNotFoundException(
                 "The Custom Dictionary with file name \"" + 
-                std::string(acpCustomDictionaryFileName) +
+                std::string(aCustomDictionaryFileName) +
                 "\" could not be opened.");
         }
-
+        
+        mInputBuffer.resize(READ_RATE);
     }
 #pragma endregion
 
@@ -80,23 +82,27 @@ namespace wyrd
 
 #pragma region Lexical Analyzer Methods
 
-    void Lexicon::verify(std::istream &aTextStream) const
+    bool Lexicon::verify(std::istream *pTextStream) 
     {
         //Confirm Morphology
-        checkMorphology(aTextStream);
+        return checkMorphology(pTextStream);
     }
 
-    void Lexicon::checkMorphology(std::istream &aTextStream) const
+    /*
+     * TODO: ensure checking is present to only run the tokenize
+     *       method when the config'd text setting is ASCII, not utf-16, etc.
+     */
+    bool Lexicon::checkMorphology(std::istream *pTextStream) 
     {
-        std::string buffer;
-        while (std::getline(aTextStream, buffer))
+        while (pTextStream->read(&mInputBuffer[0], READ_RATE))
         {
-
+            //tokenize FROM ANOTHER CLASS
         }
     }
 
     /*
      * tokenize
+     * TODO: outsource into another class
      * 
      * @param acrInput const string&
      */
