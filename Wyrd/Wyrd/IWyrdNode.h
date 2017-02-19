@@ -5,6 +5,7 @@
 #pragma once
 #include "Common.h"
 #include <string>
+#include <vector>
 
 namespace wyrd
 {
@@ -14,19 +15,17 @@ namespace wyrd
     {
     public:
 
-        // Get the next node at this level. Parameter is offset to move.
-        virtual IWyrdNode<DocumentSection>* next(unsigned int) = 0;
-
-        // Get the previous node at this level. Parameter is offset to move.
-        virtual IWyrdNode<DocumentSection>* previous(unsigned int) = 0;
-
         // Get the first node at the level below
-        virtual IWyrdNode<DocumentSection>* enter() = 0;
+        virtual const std::vector<IWyrdNode<DocumentSection>> &getChildren() const = 0;
 
         // Get the containing node at the level above
-        virtual IWyrdNode<DocumentSection>* exit() = 0;
+        virtual IWyrdNode<DocumentSection>* getParent() const = 0;
 
-        virtual DocumentSection getDocumentSection() = 0;
+        virtual DocumentSection getSection() const = 0;
+
+        virtual std::string toString() const = 0;
+
+        virtual std::string getContent() const = 0;
 
         virtual ~IWyrdNode<DocumentSection>() = 0;
     };

@@ -4,6 +4,7 @@
  */
 #pragma once
 #include "IWyrdNode.h"
+#include "ITextOwner.h"
 
 namespace wyrd
 {
@@ -19,52 +20,41 @@ namespace wyrd
     class BaseWyrdNode : public IWyrdNode<DocumentSection>
     {
     public:
-        // Get the next node at this level. Parameter is offset to move.
-        virtual IWyrdNode<Current>* next(unsigned int index = 1) override
-        {
-            IWyrdNode<Current>* current = this;
-            for (int i = 0; i < index; ++i)
-            {
-                current = current->next;
-            }
-            return current;
-        }
-
-        // Get the previous node at this level. Parameter is offset to move.
-        virtual IWyrdNode<Current>* previous(unsigned int index = 1) override
-        {
-            IWyrdNode<Current>* current = this;
-            for (int i = 0; i < index; ++i)
-            {
-                current = current->previous;
-            }
-            return current;
-        }
+        BaseWyrdNode(IWyrdNode<Parent> *parent,
+            const std::vector<IWyrdNode<Child>> &children) :
+            parent(parent), children(std::move(children)) {}
 
         // Get the first node at the level below
-        virtual IWyrdNode<Child>* enter() override
+        virtual const std::vector<IWyrdNode<Child>> &getChildren() const override
         {
-            return child;
+            return children;
         }
 
         // Get the containing node at the level above
-        virtual IWyrdNode<Parent>* exit() override
+        virtual IWyrdNode<Parent>* getParent() const override
         {
             return parent;
         }
 
-        virtual DocumentSection getSection() override
+        virtual DocumentSection getSection() const override
         {
             return Current;
         }
 
-        virtual ~BaseWyrdNode() {}
+        virtual std::string toString() const = 0;
+
+        virtual ~BaseWyrdNode() = 0;
+
+        DefineException(WyrdTreeException, WyrdException)
+        DefineException(BadNodeTypeException, WyrdTreeException)
 
     private:
-        IWyrdNode<Parent>* parent;
-        IWyrdNode<Child>* child;
-        IWyrdNode<Current>* next;
-        IWyrdNode<Current>* previous;
+        IWyrdNode<Parent>* parent = nullptr;
+        std::vector<IWyrdNode<Child>> children = 
+            std::vector<IWyrdNode<Child>>();
+
+        std::string content = "";
+
     };
 
     class DocumentNode :
@@ -73,6 +63,10 @@ namespace wyrd
                             DocumentSection::Paragraph>
     {
 
+        virtual std::string toString() const override
+        {
+            return "";
+        }
     };
 
     class ParagraphNode :
@@ -81,6 +75,10 @@ namespace wyrd
                             DocumentSection::Sentence>
     {
 
+        virtual std::string toString() const override
+        {
+            return "";
+        }
     };
 
     class SentenceNode :
@@ -89,22 +87,65 @@ namespace wyrd
                             DocumentSection::Word>
     {
 
+        virtual std::string toString() const override
+        {
+            return "";
+        }
     };
 
+    /*
+     * WordComponentNode
+     * 
+     * TODO: add ability to look up alternative phrasings
+     */
     class WordNode : 
         public BaseWyrdNode<DocumentSection::Word,
                             DocumentSection::Sentence,
                             DocumentSection::WordComponent>
     {
 
+        virtual std::string toString() const override
+        {
+            std::string toReturn = "";
+            for (int i = 0; i < getChildren().size(); ++i)
+            {
+                toReturn += (i ? "" : "-") + getChildren()[i].toString();
+            }
+            return toReturn;
+        }
+
     };
 
+    /*
+     * WordComponentNode
+     * 
+     * TODO: add ability to look up alternative phrasings
+     * Can identify adjective and adverbial meanings somehow
+     */
     class WordComponentNode : 
         public BaseWyrdNode<DocumentSection::WordComponent,
                             DocumentSection::Word,
-                            DocumentSection::null>
+                            DocumentSection::null>,
+        public ITextOwner
     {
 
+        virtual std::string toString() const override
+        {
+            return getText();
+        }
+
+        virtual std::string getText() const override
+        {
+            return text;
+        }
+
+        virtual void setText(std::string s) override
+        {
+            text = s;
+        }
+
+    private:
+        std::string text;
     };
 
 }

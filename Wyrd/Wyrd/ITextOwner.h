@@ -8,7 +8,7 @@
 class ITextOwner
 {
     // Get the text of this node as a string
-    virtual std::string getText() = 0;
+    virtual std::string getText() const = 0;
 
     // Set the string text of this node
     virtual void setText(std::string) = 0;
