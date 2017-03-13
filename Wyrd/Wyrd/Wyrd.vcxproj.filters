@@ -16,94 +16,37 @@
     <Filter Include="Documentation">
       <UniqueIdentifier>{ac3a159f-a7d7-41cd-825f-decfaf145782}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Interfaces">
-      <UniqueIdentifier>{fefee31e-a1d5-49c3-9f28-bdc45607cd7d}</UniqueIdentifier>
+    <Filter Include="Testing">
+      <UniqueIdentifier>{f31e3a76-96e3-4066-a5af-e9ea647fc94b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Lexicon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Syntax.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WyrdGraph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IVerifier.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="IAggregateVerifier.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="AggregateStreamVerifier.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LexicalVerifier.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WyrdParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IParser.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="ITextOwner.h">
-      <Filter>Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="IWyrdNode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WyrdNodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="driver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Lexicon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WyrdGraph.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Syntax.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AggregateStreamVerifier.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LexicalVerifier.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WyrdParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseWyrdNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WyrdNodes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="dictionary.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="syntax.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="TokiSonaFeatures.txt">
-      <Filter>Documentation</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DesignDocument.html">
+    <None Include="TokiSonaInterpreter\DesignDocument.html">
       <Filter>Documentation</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Testing\driver.cpp">
+      <Filter>Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="tslex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TokiSonaInterpreter\syntax.txt">
+      <Filter>Documentation</Filter>
+    </Text>
+    <Text Include="TokiSonaInterpreter\TokiSonaFeatures.txt">
+      <Filter>Documentation</Filter>
+    </Text>
+    <Text Include="TokiSonaInterpreter\core_dictionary.txt">
+      <Filter>Documentation</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tslex.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

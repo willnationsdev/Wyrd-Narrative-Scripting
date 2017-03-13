@@ -1,0 +1,150 @@
+
+==================== FINAL INTERFACE ====================
+2017-03-12 17:41:58.5316061 UTC
+
+interface Wyrd-0.1.0.0-4JCULo2kQf76e3ZuwFNnR0:TokiSonaLib 8002
+  interface hash: c14af46ca08a2385dda79789b9331628
+  ABI hash: 8d9439b01bd830a68a2b844329f59ea6
+  export-list hash: b45b3f2bde27bd6fb47e9a7a7fa19f0f
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: a9c315ec71a6a1bf9c3cc77f3b0cb66d
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  TokiSonaLib.last'
+  TokiSonaLib.last2
+  TokiSonaLib.lastn
+  TokiSonaLib.length'
+  TokiSonaLib.someFunc
+module dependencies:
+package dependencies: base-4.9.1.0* ghc-prim-0.5.0.0
+                      integer-gmp-1.0.0.1
+orphans: base-4.9.1.0:GHC.Base base-4.9.1.0:GHC.Float
+family instance modules: base-4.9.1.0:Control.Applicative
+                         base-4.9.1.0:Data.Either base-4.9.1.0:Data.Functor.Const
+                         base-4.9.1.0:Data.Monoid base-4.9.1.0:Data.Type.Equality
+                         base-4.9.1.0:GHC.Generics base-4.9.1.0:GHC.IO.Exception
+                         base-4.9.1.0:GHC.TypeLits
+import  -/  base-4.9.1.0:Data.Foldable 254e836c2d813d34e47feb29bb8d40ed
+import  -/  base-4.9.1.0:GHC.Base 4caea1123ecf4b46e27cbccd6d279377
+import  -/  base-4.9.1.0:GHC.List d11eb227c1c6fbfd89bb781d72eaea0d
+import  -/  base-4.9.1.0:GHC.Num 38b8aac8807c096c7f3ca3c1eff02939
+import  -/  base-4.9.1.0:Prelude 74b3e204395920329f6de9d97206abe9
+import  -/  base-4.9.1.0:System.IO 5daf3f384209c11d9566e3409af8ec5d
+import  -/  ghc-prim-0.5.0.0:GHC.Types 89f8de4f08018c9177c98d979eae0e45
+7cbf859484c635f68dbacbdb88d9a07e
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   TokiSonaLib.$trModule2
+                   TokiSonaLib.$trModule1) -}
+5ea4cb8fa7995a76037e8728269e9337
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS "TokiSonaLib"#) -}
+9fbf9e456f481d0b2805089c919d6601
+  $trModule2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS
+                   "Wyrd-0.1.0.0-4JCULo2kQf76e3ZuwFNnR0"#) -}
+0a645b0e15896a6a012e72d3b8c9cd16
+  $wlength' :: (Data.Foldable.Foldable t, GHC.Num.Num b) => t a -> b
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(LLC(C(S))LLLLLLLLLLLLL),1*U(A,A,1*C1(C1(U)),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,U(1*C1(U),A,A,A,A,A,C(U))>,
+     Inline: [0],
+     Unfolding: (\ @ (t :: * -> *)
+                   @ b
+                   @ t1
+                   @ a
+                   (w :: Data.Foldable.Foldable t)
+                   (w1 :: GHC.Num.Num b) ->
+                 let {
+                   lvl :: b -> b
+                   = GHC.Num.+
+                       @ b
+                       w1
+                       (GHC.Num.fromInteger @ b w1 TokiSonaLib.length'2)
+                 } in
+                 Data.Foldable.foldr
+                   @ t
+                   w
+                   @ a
+                   @ b
+                   (\ (ds :: a) -> lvl)
+                   (GHC.Num.fromInteger @ b w1 TokiSonaLib.length'1)) -}
+1b7e400bed13ae1e5778f11340c123e1
+  last' :: [a] -> a
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ @ a (ds :: [a]) ->
+                 case ds of wild {
+                   [] -> GHC.List.foldl2 @ a
+                   : x xs -> TokiSonaLib.last'1 @ a xs x }) -}
+aa2f7d60c98565aac8812e907b70e85a
+  last'1 :: [a] -> a -> a
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><L,1*U> -}
+63d41097642e80218c691cca3181ed53
+  last2 :: [a] -> a
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ @ a (xs :: [a]) ->
+                 GHC.List.$w!! @ a (GHC.List.reverse @ a xs) 1#) -}
+a9266e5f62c3f95930ce45dacfcf5f08
+  lastn :: [a] -> GHC.Types.Int -> a
+  {- Arity: 2, Strictness: <S,1*U><S(S),1*U(U)>,
+     Unfolding: InlineRule (2, True, False)
+                (\ @ a (xs :: [a]) (n :: GHC.Types.Int) ->
+                 case n of wild { GHC.Types.I# x ->
+                 GHC.List.$w!!
+                   @ a
+                   (GHC.List.reverse @ a xs)
+                   (GHC.Prim.-# x 1#) }) -}
+d8f9cd80505136e8bd13a3e2a563d5ba
+  length' ::
+    (Data.Foldable.Foldable t, GHC.Num.Num b) => t1 -> t a -> b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <S(LLC(C(S))LLLLLLLLLLLLL),1*U(A,A,1*C1(C1(U)),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,U(1*C1(U),A,A,A,A,A,C(U))><L,A>,
+     Inline: INLINE[0],
+     Unfolding: InlineRule (3, True, True)
+                (\ @ (t :: * -> *)
+                   @ b
+                   @ t1
+                   @ a
+                   (w :: Data.Foldable.Foldable t)
+                   (w1 :: GHC.Num.Num b)
+                   (w2 :: t1) ->
+                 TokiSonaLib.$wlength' @ t @ b @ t1 @ a w w1) -}
+24a45fb4ea0812a44a7c2b03bf5b1595
+  length'1 :: GHC.Integer.Type.Integer
+  {- HasNoCafRefs, Unfolding: (0) -}
+98caec22fff0f54a659ddef22b1a5f3b
+  length'2 :: GHC.Integer.Type.Integer
+  {- HasNoCafRefs, Unfolding: (1) -}
+f1e530a51c0ae08e0bd7ac20274d4a7e
+  someFunc :: GHC.Types.IO ()
+  {- Arity: 1, Strictness: <S,U>,
+     Unfolding: InlineRule (0, True, True)
+                TokiSonaLib.someFunc1 `cast` (Sym (GHC.Types.N:IO[0] <()>_R)) -}
+df5df4504c7f36cb9864d87f90be9c9b
+  someFunc1 ::
+    GHC.Prim.State# GHC.Prim.RealWorld
+    -> (# GHC.Prim.State# GHC.Prim.RealWorld, () #)
+  {- Arity: 1, Strictness: <S,U>,
+     Unfolding: (\ (eta :: GHC.Prim.State#
+                             GHC.Prim.RealWorld)[OneShot] ->
+                 GHC.IO.Handle.Text.hPutStr2
+                   GHC.IO.Handle.FD.stdout
+                   TokiSonaLib.someFunc2
+                   GHC.Types.True
+                   eta) -}
+0dcb45bd95edb8a11865d513ee15aecb
+  someFunc2 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString# "someFunc Hello"#) -}
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: safe
+require own pkg trusted: False
+

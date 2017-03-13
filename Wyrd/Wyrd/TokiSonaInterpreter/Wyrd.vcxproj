@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -27,26 +27,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -68,12 +68,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\Source\GitHub\Wyrd-Narrative-Scripting\Wyrd\Wyrd;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>D:\Source\GitHub\Wyrd-Narrative-Scripting\Wyrd\Wyrd;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -123,19 +118,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="TokiSonaInterpreter\DesignDocument.html" />
+    <ClInclude Include="AggregateStreamVerifier.h" />
+    <ClInclude Include="WyrdNodes.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="IAggregateVerifier.h" />
+    <ClInclude Include="IParser.h" />
+    <ClInclude Include="IVerifier.h" />
+    <ClInclude Include="IWyrdNode.h" />
+    <ClInclude Include="LexicalVerifier.h" />
+    <ClInclude Include="Lexicon.h" />
+    <ClInclude Include="Syntax.h" />
+    <ClInclude Include="ITextOwner.h" />
+    <ClInclude Include="WyrdParser.h" />
+    <ClInclude Include="WyrdGraph.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Testing\driver.cpp" />
-    <ClCompile Include="tslex.cpp" />
+    <ClCompile Include="AggregateStreamVerifier.cpp" />
+    <ClCompile Include="BaseWyrdNode.cpp" />
+    <ClCompile Include="driver.cpp" />
+    <ClCompile Include="LexicalVerifier.cpp" />
+    <ClCompile Include="Lexicon.cpp" />
+    <ClCompile Include="Syntax.cpp" />
+    <ClCompile Include="WyrdGraph.cpp" />
+    <ClCompile Include="WyrdNodes.cpp" />
+    <ClCompile Include="WyrdParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="TokiSonaInterpreter\core_dictionary.txt" />
-    <Text Include="TokiSonaInterpreter\syntax.txt" />
-    <Text Include="TokiSonaInterpreter\TokiSonaFeatures.txt" />
+    <Text Include="dictionary.txt" />
+    <Text Include="TokiSonaFeatures.txt" />
+    <Text Include="syntax.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tslex.hpp" />
+    <None Include="DesignDocument.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
