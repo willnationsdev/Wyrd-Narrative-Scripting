@@ -7,10 +7,75 @@
 #include <sstream>
 #include <vector>
 #include <bitset>
-#include <memory>
+
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/lex_lexertl.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_statement.hpp>
+#include <boost/spirit/include/phoenix_container.hpp>
+
+#define BOOST_SPIRIT_NO_REGEX_LIB
 
 namespace ts {
-	class lex {
+
+using namespace boost::spirit;
+using namespace boost::spirit::ascii;
+
+	template <typename Lexer>
+	struct TokiSonaTokens : lex::lexer<Lexer> {
+		TokiSonaTokens()
+			: eol("[\r\n]")
+			, component("[a-zA-Z]+")
+			, componentDelimeter("-")
+			, eos("[\\.!\?:]")
+			, any(".") {
+
+			this->self.add
+				(eol)
+				(component)
+				(compDelim)
+				(eos)
+				(any)
+			;
+		}
+
+		lex::token_def<> eol, component, compDelim, eos, any;
+	};
+
+	template <typename Iterator>
+	struct TokiSonaGrammar : qi::grammar<Iterator> {
+		template <typename TokenDev>
+		TokiSonaGrammar(TokenDev const& tok)
+			: TokiSonaGrammar::base_type(start) {
+			start = *(	tok.eol			[std::cout << "eol" << std::endl]
+					 |	tok.component	[std::cout << "component" << std::endl]
+					 |  tok.compDelim	[std::cout << "compDelim" << std::endl]
+					 |  tok.eos			[std::cout << "eos" << std::endl]
+					 |  tok.any			[std::cout << "any" << std::endl]
+					 )
+				;
+		}
+		qi::rule<Iterator> start;
+	};
+
+	inline void parse(std::string input) {
+		/*typedef lex::lexertl::token<char const*, boost::mpl::vector<std::string>> token_type;
+
+		typedef lex::lexertl::lexer<token_type> lexer_type;
+
+		typedef TokiSonaGrammar<lexer_type>::iterator_type iterator_type;
+
+		TokiSonaTokens<lexer_type> tslex;
+		TokiSonaGrammar<iterator_type> tsgram(tslex);
+		char const* first = input.c_str();
+		char const* last = &first[input.size()];
+
+		bool result = lex::tokenize_and_parse(first, last, tslex, tsgram);
+		std::cout << result << std::endl;*/
+	}
+
+	/*
+	class tslex {
 	public:
 
 		struct TokenSpan {
@@ -30,15 +95,14 @@ namespace ts {
 		static const std::string sentenceDelimiters;
 		static const std::string wordDelimiters;
 
-		/*
-		 * tokenize
-		 *
-		 * Code partially derived from the following URL:
-		 * http://stackoverflow.com/questions/5505965/fast-string-splitting-with-multiple-delimiters
-		 *
-		 * @param aInput std::string const& The string to take as input
-		 * @param aDelims char const* The string of characters
-		 */
+		
+		// tokenize
+		//
+		// Code partially derived from the following URL:
+		// http://stackoverflow.com/questions/5505965/fast-string-splitting-with-multiple-delimiters
+		//
+		// @param aInput std::string const& The string to take as input
+		// @param aDelims char const* The string of characters
 		inline static std::vector<TokenSpan> tokenize(
 			std::string const& aInput, std::string const& aDelims) {
 
@@ -142,5 +206,5 @@ namespace ts {
 			}
 			return results;
 		}
-	};
+	};*/
 }
