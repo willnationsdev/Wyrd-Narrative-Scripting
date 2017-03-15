@@ -8,6 +8,7 @@
 #include <vector>
 #include <bitset>
 
+/*
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/lex_lexertl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -15,9 +16,11 @@
 #include <boost/spirit/include/phoenix_container.hpp>
 
 #define BOOST_SPIRIT_NO_REGEX_LIB
+*/
 
 namespace ts {
 
+	/*
 using namespace boost::spirit;
 using namespace boost::spirit::ascii;
 
@@ -26,7 +29,7 @@ using namespace boost::spirit::ascii;
 		TokiSonaTokens()
 			: eol("[\r\n]")
 			, component("[a-zA-Z]+")
-			, componentDelimeter("-")
+			, compDelim(" -")
 			, eos("[\\.!\?:]")
 			, any(".") {
 
@@ -44,8 +47,8 @@ using namespace boost::spirit::ascii;
 
 	template <typename Iterator>
 	struct TokiSonaGrammar : qi::grammar<Iterator> {
-		template <typename TokenDev>
-		TokiSonaGrammar(TokenDev const& tok)
+		template <typename TokenDef>
+		TokiSonaGrammar(TokenDef const& tok)
 			: TokiSonaGrammar::base_type(start) {
 			start = *(	tok.eol			[std::cout << "eol" << std::endl]
 					 |	tok.component	[std::cout << "component" << std::endl]
@@ -56,14 +59,15 @@ using namespace boost::spirit::ascii;
 				;
 		}
 		qi::rule<Iterator> start;
+
 	};
 
 	inline void parse(std::string input) {
-		/*typedef lex::lexertl::token<char const*, boost::mpl::vector<std::string>> token_type;
+		typedef lex::lexertl::token<char const*, boost::mpl::vector<std::string>> token_type;
 
 		typedef lex::lexertl::lexer<token_type> lexer_type;
 
-		typedef TokiSonaGrammar<lexer_type>::iterator_type iterator_type;
+		typedef TokiSonaTokens<lexer_type>::iterator_type iterator_type;
 
 		TokiSonaTokens<lexer_type> tslex;
 		TokiSonaGrammar<iterator_type> tsgram(tslex);
@@ -71,10 +75,9 @@ using namespace boost::spirit::ascii;
 		char const* last = &first[input.size()];
 
 		bool result = lex::tokenize_and_parse(first, last, tslex, tsgram);
-		std::cout << result << std::endl;*/
-	}
+		std::cout << result << std::endl;
+	}*/
 
-	/*
 	class tslex {
 	public:
 
@@ -121,10 +124,8 @@ using namespace boost::spirit::ascii;
 				delimSet[c] = true;
 			}
 
-			// terminology shortcut
-			typedef std::string::const_iterator iter;
 			// iteration marker for the start of a token
-			iter begin;
+			std::string::const_iterator begin;
 			// flag that a token is prepared
 			bool tokenReady = false;
 
@@ -170,7 +171,7 @@ using namespace boost::spirit::ascii;
 		//TODO: Need to add full usage of TSDocument type to store all parsed areas
 		//TODO: Need to extract IO content and attach functions as parameters somehow
 		//to be called when the given switch case is encountered.
-		inline static TSDocument analyze(std::string input) {
+		inline static TSDocument parse(std::string input) {
 
 			std::vector<TokenSpan> paragraphs = tokenize(input, paragraphDelimiters);
 			std::vector<TokenSpan> sentences;
@@ -178,15 +179,19 @@ using namespace boost::spirit::ascii;
 			std::vector<TokenSpan> components;
 			TSDocument results;
 
+			//For each paragraph...
 			for (auto iParagraph = paragraphs.cbegin(); iParagraph !=
 				paragraphs.cend(); ++iParagraph) {
 
+				//Collect the sentences
 				sentences = tokenize(std::string(iParagraph->cbegin,
 					iParagraph->cend), sentenceDelimiters);
 
+				//For each sentence...
 				for (auto iSentence = sentences.cbegin(); iSentence !=
 					sentences.cend(); ++iSentence) {
 
+					//Collect the words
 					words = tokenize(std::string(iSentence->cbegin,
 						iSentence->cend), wordDelimiters);
 
@@ -198,13 +203,17 @@ using namespace boost::spirit::ascii;
 					case '?': prefix = "Question: "; break;
 					case ':': prefix = "Clarification"; break;
 					}
+
+					//For each word...
 					for (auto iWord = words.cbegin(); iWord != words.cend();
 						++iWord) {
 
+						//Note: no need to delimit on the individual components. We are delimiting words all the same.
+						//just need to alter the behavior based on which delimeter shows up
 					}
 				}
 			}
 			return results;
 		}
-	};*/
+	};
 }

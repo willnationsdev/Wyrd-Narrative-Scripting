@@ -5,9 +5,9 @@
 #include "tslex.hpp"
 
 namespace ts {
-	/*const std::string tslex::paragraphDelimiters = "\n";
+	const std::string tslex::paragraphDelimiters = "\n";
 	const std::string tslex::sentenceDelimiters = ".!?:";
-	const std::string tslex::wordDelimiters = " -";*/
+	const std::string tslex::wordDelimiters = " -";
 }
 
 /*

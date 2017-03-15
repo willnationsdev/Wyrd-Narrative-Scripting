@@ -8,8 +8,8 @@
 int main()
 {
 	std::string input = "o moku! mi moku kin.\nnimi-sina seme? nimi-mi li Will.";
-	//ts::tslex::TSDocument doc = ts::tslex::analyze(input);
-	ts::parse(input);
+	ts::tslex::TSDocument doc = ts::tslex::parse(input);
+	//ts::parse(input);
 	std::cin.get();
 	return 0;
 }
