@@ -24,12 +24,12 @@ namespace ts {
 	public:
 		GrammarNode() {}
 		virtual ~GrammarNode() {}
-		std::vector<GrammarNode*> getChildren() const {
+		std::vector<const GrammarNode*> getChildren() const {
 			return children;
 		}
 
 	private:
-		std::vector<GrammarNode*> children;
+		std::vector<const GrammarNode*> children;
 	};
 
 	class GrammarTree : public GrammarNode {
@@ -46,7 +46,7 @@ namespace ts {
 			for (auto node : treeToKill->getChildren()) {
 				GrammarTree::kill(node);
 			}
-			if (treeToKill->getChildren.empty()) {
+			if (treeToKill->getChildren().empty()) {
 				delete treeToKill;
 			}
 			return nullptr;
@@ -79,7 +79,7 @@ namespace ts {
 	//};
 
 	template <typename Iterator>
-	struct TokiSonaGrammar : qi::grammar<Iterator, > {
+	struct TokiSonaGrammar : qi::grammar<Iterator, GrammarTree()> {
 		template <typename TokenDef>
 		TokiSonaGrammar(TokenDef const& tok)
 			: TokiSonaGrammar::base_type(start) {
@@ -114,12 +114,13 @@ namespace ts {
 		typedef std::string::iterator iterator_type;
 
 		//TokiSonaTokens<lexer_type> tslex;
-		TokiSonaGrammar<iterator_type> tsgram;
+		//TokiSonaGrammar<iterator_type> tsgram;
 		char const *first = input.c_str();
 		char const *last = &first[input.size()];
 
-		bool result = lex::tokenize_and_parse(first, last, tslex, tsgram);
-		return result;
+		//bool result = lex::tokenize_and_parse(first, last, tslex, tsgram);
+		//return result;
+		return true;
 	}
 
 	/*
