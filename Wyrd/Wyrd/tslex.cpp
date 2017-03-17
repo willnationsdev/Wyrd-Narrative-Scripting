@@ -11,6 +11,8 @@ namespace ts {
 	const std::string tslex::tsConsonants = "mnptkswlj";
 	const std::string tslex::tsVowels = "aeiou";
 	const std::string tslex::tsPunctuation = ".,!?:";*/
+
+	const std::string Subject::nounConcatenator = "en";
 }
 
 /*

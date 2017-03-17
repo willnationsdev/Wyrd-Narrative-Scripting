@@ -53,6 +53,44 @@ namespace ts {
 		}
 	};
 
+	struct Noun {
+		std::string noun;
+		std::vector<std::string> modifiers;
+		static const char nounConnector = '-';
+	};
+
+	struct NounPhrase {
+		std::vector<Noun> nouns;
+		static const std::string nounConcatenator;
+	};
+	typedef NounPhrase Subject;
+
+	struct Verb {
+		std::string verb;
+		std::vector<std::string> modifiers;
+		static const char verbConnector = '-';
+	};
+
+	struct VerbPhrase {
+
+	};
+
+	struct Predicate {
+
+	};
+
+	struct SubjectPredicate {
+
+	};
+
+	struct Conditional {
+		
+	};
+
+	struct Sentence {
+		
+	};
+
 	using namespace boost::spirit;
 	using namespace boost::spirit::ascii;
 
@@ -84,7 +122,65 @@ namespace ts {
 		TokiSonaGrammar(TokenDef const& tok)
 			: TokiSonaGrammar::base_type(start) {
 
-			start = interjection | vocativeSentence | Sentence | yesNoAnswer;
+			start =
+				interjection |
+				vocativeSentence |
+				sentence |
+				yesNoAnswer;
+			vocativeSentence =
+				(nounPhrase >> qi::lit('o')) |
+				(nounPhrase >> qi::lit('o') >> qi::lit(',') >> sentence) |
+				(nounPhrase >> qi::lit('o') >> predicate) |
+				(qi::lit('o') >> predicate) |
+				(conditional >> qi::lit('o') >> predicate);
+			yesNoAnswer =
+				verb |
+				verb >> qi::string("ala");
+			sentence =
+				subjectPredicate |
+				(conditional >> subjectPredicate) |
+				qi::string("taso") >> subjectPredicate;
+			conditional =
+				subjectPredicate >> qi::string("la") |
+				context >> qi::string("la") |
+				nounPhrase >> qi::string("la");
+			subjectPredicate =
+				qi::string("mi") >> predicate |
+				qi::string("sina") >> predicate |
+				nounPhraseNoMiSina >> qi::string("li") >> predicate |
+				compoundSubject >> qi::string("li") >> predicate;
+			nounPhraseNoMiSina =
+				nounNoMiSina |
+				compoundNounPhrase;
+			nounPhrase =
+				noun |
+				compoundNounPhrase;
+			compoundNounPhrase =
+				nounModified |
+				nounPhrasePi |
+				nounPhrase >> qi::string("anu") >> nounPhrase;
+			nounPhrasePi =
+				nounPhrase >> qi::string("pi") >> noun >> modifierForm |
+				nounPhrase >> qi::string("pi") >> name;
+			nounModifier =
+				noun >> qi::char_('-') >> modifierForm |
+				noun >> qi::char_('-') >> noun |
+				noun >> qi::char_('-') >> noun >> qi::char_('-') >> modifierForm;
+			modifierForm =
+				modifier |
+				modifier >> modifierForm;
+			predicate =
+				verbPhrase |
+				verbPhrase >> qi::string("li") >> predicate;
+			verbPhrase =
+				intransitiveVerbPhrase |
+				transitiveVerbPhrase |
+				verbPhrase >> prepositionalPhrase;
+			intransitiveVerbPhrase =
+				verbForm |
+				qi::string("lon") >> nounPhrase |
+
+
 
 			//using boost::phoenix::ref;
 			/*
@@ -101,6 +197,33 @@ namespace ts {
 		qi::rule<Iterator, GrammarTree()> vocativeSentence;
 		qi::rule<Iterator, GrammarTree()> sentence;
 		qi::rule<Iterator, GrammarTree()> yesNoAnswer;
+		qi::rule<Iterator, GrammarTree()> conditional;
+		qi::rule<Iterator, GrammarTree()> subjPredicate;
+		qi::rule<Iterator, GrammarTree()> compoundSubject;
+		qi::rule<Iterator, GrammarTree()> nounPhraseNoMiSina;
+		qi::rule<Iterator, GrammarTree()> nounPhrase;
+		qi::rule<Iterator, GrammarTree()> compoundNounPhrase;
+		qi::rule<Iterator, GrammarTree()> nounPhrasePi;
+		qi::rule<Iterator, GrammarTree()> nounModified;
+		qi::rule<Iterator, GrammarTree()> modifierForm;
+		qi::rule<Iterator, GrammarTree()> predicate;
+		qi::rule<Iterator, GrammarTree()> verbPhrase;
+		qi::rule<Iterator, GrammarTree()> intransitiveVerbPhrase;
+		qi::rule<Iterator, GrammarTree()> transitiveVerbPhrase;
+		qi::rule<Iterator, GrammarTree()> directObject;
+		qi::rule<Iterator, GrammarTree()> verbForm;
+		qi::rule<Iterator, GrammarTree()> yesNoQuestion;
+		qi::rule<Iterator, GrammarTree()> prepositionalPhrase;
+		qi::rule<Iterator, GrammarTree()> context;
+		qi::rule<Iterator, GrammarTree()> modal;
+		qi::rule<Iterator, GrammarTree()> posModal;
+		qi::rule<Iterator, GrammarTree()> yesNoModal;
+		qi::rule<Iterator, GrammarTree()> verb;
+		qi::rule<Iterator, GrammarTree()> noun;
+		qi::rule<Iterator, GrammarTree()> modifier;
+		qi::rule<Iterator, GrammarTree()> preposition;
+		qi::rule<Iterator, GrammarTree()> interjection;
+		qi::rule<Iterator, GrammarTree()> name;
 
 		//int i_eol, i_component, i_compDelim, i_eos, i_any;
 	};
