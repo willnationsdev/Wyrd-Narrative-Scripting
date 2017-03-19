@@ -7,7 +7,12 @@
 namespace ts {
 	/*const std::string tslex::paragraphDelimiters = "\n";
 	const std::string tslex::sentenceDelimiters = ".!?:";
-	const std::string tslex::wordDelimiters = " -";*/
+	const std::string tslex::wordDelimiters = " -";
+	const std::string tslex::tsConsonants = "mnptkswlj";
+	const std::string tslex::tsVowels = "aeiou";
+	const std::string tslex::tsPunctuation = ".,!?:";*/
+
+	const std::string Subject::nounConcatenator = "en";
 }
 
 /*
