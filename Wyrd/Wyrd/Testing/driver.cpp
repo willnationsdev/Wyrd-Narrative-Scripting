@@ -8,8 +8,9 @@
 int main()
 {
     std::string input = "umina avela.";
-    ts::TokawajeGrammar<std::string::iterator> tg;
-    ts::data::Sentence sentence = qi::parse(input.begin(), input.end(), tg);
+    ts::TokawajeGrammar<std::string::iterator> grammar;
+    ts::data::Sentence sentence;
+    qi::parse(input.begin(), input.end(), grammar, sentence);
     std::cin.get();
     return 0;
 }
