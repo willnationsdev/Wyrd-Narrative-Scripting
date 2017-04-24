@@ -10,6 +10,7 @@
 #include <cctype>
 #include <utility>
 
+#include <boost/phoenix/object/static_cast.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
@@ -19,200 +20,152 @@
 #include <boost/spirit/include/phoenix_container.hpp>
 
 #define BOOST_SPIRIT_NO_REGEX_LIB
-#define CONCEPT_MAX 10
 
-namespace ts {
+namespace tokawaje {
+    namespace grammar {
 
-    namespace data {
-        typedef std::vector<char>
-            Remaining;
-        typedef Remaining
-            UnknownSentence;
-        typedef Remaining
-            UnknownConcept;
-        typedef Remaining
-            UnknownRootOrTag;
-        typedef Remaining
-            BadGrammarPrefixWord;
-        typedef char
-            TagConsonant;
-        typedef char
-            Vowel;
-        typedef char
-            RootConsonant;
-        typedef char
-            Precision;
-        typedef char
-            Tag;
-        typedef std::tuple<char>
-            Root;
-        typedef boost::variant<boost::variant<Root, Tag>, UnknownRootOrTag>
-            PartialConcept;
-        typedef
-            boost::variant<std::pair<PartialConcept, Precision>, UnknownConcept>
-            FullConcept;
-        typedef std::vector<FullConcept>
-            Word;
-        typedef char
-            GrammarPrefix;
-        typedef boost::optional<char>
-            Comma;
-        typedef std::vector<Vowel>
-            Expression;
-        typedef boost::variant<std::tuple<GrammarPrefix, Word, Comma>,
-            Expression, BadGrammarPrefixWord>
-            GrammarWord;
-        typedef std::vector<GrammarWord>
-            Context;
-        typedef char
-            EndOfSentence;
-        typedef boost::variant<
-            std::pair<Context, std::vector<EndOfSentence>>, UnknownSentence>
-            Sentence;
-    }
-
-    namespace tokawaje {
-        namespace grammar {
+        /*
+        namespace data {
             enum class Vowel {
-                a = 97, e = 101, i = 105, o = 111, u = 117, y = 121, q = 113
+                a = 'a', e = 'e', i = 'i', o = 'o', u = 'u', y = 'y', q = 'q'
             };
             enum class RootConsonant {
-                m = 109, n = 110, p = 112, k = 107, t = 116, s = 115, v = 118, 
-                l = 108, w = 119, j = 106
+                m = 'm', n = 'n', p = 'p', k = 'k', t = 't', s = 's', v = 'v',
+                l = 'l', w = 'w', j = 'j'
             };
             enum class TagConsonant {
-                x = 120, f = 70, z = 122, c = 99, b = 98
+                x = 'x', f = 'f', z = 'z', c = 'c', b = 'b'
             };
-            struct Expression {
-                std::vector<Vowel> vowels; //a variable length of vowels
+            enum class EndOfSentence {
+                period = '.', exclamation = '!', question = '?', colon = ':',
+                comma = ','
             };
-            struct Tag {
-                TagConsonant first;
-                Vowel suffix;
+            enum class Splice {
+                comma = ','
             };
+
             struct Root {
-                union {
-                    struct {
-                        union {
-                            struct {
-                                RootConsonant first;
-                                Vowel second;
-                                RootConsonant third;
-                            };
-                            char root[3];
-                        };
-                        char suffix;
-                    };
-                    char concept[4];
-                };
+                RootConsonant first;
+                Vowel second;
+                RootConsonant third;
             };
-            struct BasicConcept
-            struct Concept{
-            public:
-                char prefix;
-                std::vector<Tag> tags;
-            };
-            class Context {
 
-            };
-            class TWSentence {
-                std::vector<
-            };
+            BOOST_FUSION_ADAPT_STRUCT(Root,
+            (boost::phoenix::static_cast_<RootConsonant>(_1), first)
+            (boost::phoenix::static_cast_<Vowel>(_2), second)
+            (boost::phoenix::static_cast_<RootConsonant>(_3), third)
+            )
+
+            typedef std::vector<std::string> Remaining;
+            typedef Remaining UnknownSentence;
+            typedef Remaining UnknownConcept;
+            typedef Remaining UnknownRootOrTag;
+            typedef Remaining BadGrammarPrefixWord;
+            typedef std::vector<Vowel> Expression;
+            typedef TagConsonant Tag;
+            typedef boost::variant<Root, Tag> Spectrum;
+            typedef std::tuple<Spectrum, Vowel> Concept;
+            typedef std::tuple<Vowel, std::vector<Concept>> Word;
+            typedef std::tuple<std::vector<Word>, std::vector<EndOfSentence>> Sentence;
+
         }
-    }
+        */
 
-    using namespace boost::spirit;
-    using namespace boost::spirit::ascii;
+        using namespace boost::spirit;
+        using namespace boost::spirit::ascii;
 
-    template <typename Iterator>
-    struct TokawajeGrammar : qi::grammar<Iterator, data::Sentence> {
+        //using namespace boost::spirit::qi::symbols;
+        //using namespace boost::spirit::qi::tst;
+        //using namespace boost::spirit::qi::tst_map;
 
-        TokawajeGrammar() : TokawajeGrammar::base_type(start) {
+        //symbols<char, int>
 
-            sentence =
-                context >> *endOfSentence |
+/*
+struct Dog
+{
+std::string Name;
+bool Barks;
+bool HasATail;
+std::string Address;
+};
+
+dog_ = qi::lit("DOG") >> '|' >> "Name=" >> lit_   >> '|'
+>> "Barks="       >> yesno_ >> '|'
+>> "Has a Tail="  >> yesno_ >> '|'
+>> "Address="     >> lit_
+;
+
+BOOST_FUSION_ADAPT_STRUCT(Dog,
+(std::string, Name)(bool, Barks)(bool, HasATail)(std::string, Address))
+*/
+
+
+        /*
+        template <typename Iterator>
+        struct RootTagGrammar : qi::grammar<Iterator, data::Sentence> {
+
+            RootTagGrammar() : RootTagGrammar::base_type(sentence) {
+
+                //sentence = +word >> *endOfSentence;
+
+                //word = vowel >> +concept;
+
+                //concept = spectrum >> vowel;
+
+                //spectrum = (root | tag);
+
+                //expression = +vowel;
+
+                root = (rootConsonant >> vowel >> rootConsonant);
+
+                //tag = (tagConsonant >> vowel);
+
+                rootConsonant = qi::char_("mnptkvshwlj") [ _val = 
+                    boost::phoenix::static_cast_<data::RootConsonant>(_1)
+                ];
+
+                vowel = qi::char_("eaiouyq") [ _val = 
+                    boost::phoenix::static_cast_<data::Vowel>(_1)
+                ];
+
+                tagConsonant = qi::char_("xfzcb") [ _val = 
+                    boost::phoenix::static_cast_<data::TagConsonant>(_1)
+                ];
+                
+                //unknownSentence = remaining;
+
+                //unknownConcept = remaining;
+
+                //badGrammarPrefixWord = remaining;
+
+                //remaining = *qi::char_("*");
+            }
+
+            qi::rule<Iterator, qi::space_type, data::Sentence> sentence;
+            qi::rule<Iterator, data::EndOfSentence> endOfSentence;
+            //qi::rule<Iterator, qi::space_type, data::Contexts> contexts;
+            //qi::rule<Iterator, qi::space_type, data::Context> context;
+            qi::rule<Iterator, data::Word> word;
+            //qi::rule<Iterator, data::Concepts> concepts;
+            qi::rule<Iterator, data::Concept> concept;
+            qi::rule<Iterator, data::Spectrum> spectrum;
+            qi::rule<Iterator, data::Expression> expression;
+            qi::rule<Iterator, data::Splice> splice;
+            qi::rule<Iterator, data::Root> root;
+            qi::rule<Iterator, data::Tag> tag;
+            qi::rule<Iterator, data::RootConsonant> rootConsonant;
+            qi::rule<Iterator, data::Vowel> vowel;
+            qi::rule<Iterator, data::TagConsonant> tagConsonant;
+            /*qi::rule<Iterator, qi::space_type, data::UnknownSentence> 
                 unknownSentence;
-
-            endOfSentence = 
-                '.' | '?' | '!' | ':' | ',' | ';' | '|';
-
-            context = 
-                *grammarWord;
-
-            grammarWord =
-                (grammarPrefix >> word >> ?comma) |
-                expression |
-                badGrammarPrefixWord;
-
-            expression =
-                +vowel;
-
-            comma =
-                ',';
-
-            grammarPrefix =
-                'u' | 'a' | 'i' | 'e' | 'o';
-
-            word =
-                +(fullConcept);
-
-            fullConcept =
-                partialConcept >> precision | 
+            qi::rule<Iterator, qi::space_type, data::UnknownConcept> 
                 unknownConcept;
-
-            partialConcept =
-                (root | tag) | 
+            qi::rule<Iterator, qi::space_type, data::UnknownRootOrTag> 
                 unknownRootOrTag;
-
-            root =
-                rootConsonant >> Vowel >> rootConsonant;
-
-            tag =
-                tagConsonant;
-
-            rootConsonant =
-                'm' | 'n' | 'p' | 't' | 'k' | 'v' | 's' | 'h' | 'w' | 'l' |
-                'j';
-
-            vowel =
-                'e' | 'a' | 'i' | 'o' | 'u' | 'y' | 'q';
-
-            tagConsonant =
-                'x' | 'f' | 'z' | 'c' | 'b';
-
-            unknownSentence = 
-                remaining;
-
-            unknownConcept = 
-                remaining;
-
-            badGrammarPrefixWord = 
-                remaining;
-
-            remaining =
-                *qi::char_("*");
-        }
-
-        qi::rule<Iterator, qi::space_type, data::Sentence> sentence;
-        qi::rule<Iterator, data::EndOfSentence> endOfSentence;
-        qi::rule<Iterator, qi::space_type, data::Context> context;
-        qi::rule<Iterator, data::GrammarWord> grammarWord;
-        qi::rule<Iterator, data::Expression> expression;
-        qi::rule<Iterator, data::Comma> comma;
-        qi::rule<Iterator, data::GrammarPrefix> grammarPrefix;
-        qi::rule<Iterator, data::Word> word;
-        qi::rule<Iterator, data::FullConcept> fullConcept;
-        qi::rule<Iterator, data::PartialConcept> partialConcept;
-        qi::rule<Iterator, data::Root> root;
-        qi::rule<Iterator, data::Tag> tag;
-        qi::rule<Iterator, data::Precision> precision;
-        qi::rule<Iterator, data::RootConsonant> rootConsonant;
-        qi::rule<Iterator, data::Vowel> vowel;
-        qi::rule<Iterator, data::TagConsonant> tagConsonant;
-        qi::rule<Iterator, data::UnknownSentence> unknownSentence;
-        qi::rule<Iterator, data::UnknownConcept> unknownConcept;
-        qi::rule<Iterator, data::UnknownRootOrTag> unknownRootOrTag;
-        qi::rule<Iterator, data::BadGrammarPrefixWord> badGrammarPrefixWord;
-    };
+            qi::rule<Iterator, qi::space_type, data::BadGrammarPrefixWord> 
+                badGrammarPrefixWord;
+            qi::rule<Iterator, qi::space_type, data::Remaining> remaining;*/
+        //};
+    }
 
 }
