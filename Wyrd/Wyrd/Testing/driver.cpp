@@ -3,23 +3,48 @@
  * Date Created: 02/27/2017
  */
 #include <iostream>
-#include "tslex.hpp"
-#include <boost/spirit/include/qi_symbols.hpp>
+#include "json.hpp"
+#include "wyrd.hpp"
 
-using boost::spirit::qi::symbols;
+using ParseData = std::vector<std::string>;
 
 int main()
 {
-    std::string input = "m";
+    /*
+    std::string line;
+    std::getline(std::cin, line);
+    while (line != "quit") {
 
-    symbols<char, int> sym;
+        try {
+            ParseData d = wyrd::WyrdParser::parse<ParseData>(line.cbegin(), line.cend());
+            for (auto item : d) {
+                std::cout << item << std::endl;
+            }
+            std::getline(std::cin, line);
+        }
+        catch (std::exception e) {
+            std::cout << e.what() << std::endl;
+            return 0;
+        }
 
-    sym.add("min");
+    }
+    */
 
-    
-    //tokawaje::grammar::RootTagGrammar<std::string::iterator> grammar;
-    //tokawaje::grammar::data::Sentence sentence;
-    //boost::spirit::qi::parse(input.begin(), input.end(), grammar, sentence);
+    //file
+    std::ifstream file("syntax.json");
+    if (!file.is_open()) {
+        std::cout << "could not open file" << std::endl;
+        std::cin.get();
+        return 0;
+    }
+
+    json j;
+    file >> j;
+    for (auto item : j["syntaxConcepts"]) {
+        auto value = item.size();
+        std::cout << std::setw(4) << value << std::endl;
+    }
+
     std::cin.get();
     return 0;
 }

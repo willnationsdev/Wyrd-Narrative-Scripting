@@ -127,19 +127,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="coreRootMorphology.json" />
+    <None Include="syntax.json" />
     <None Include="TokiSonaInterpreter\DesignDocument.html" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Testing\driver.cpp" />
-    <ClCompile Include="tslex.cpp" />
+    <ClCompile Include="wyrd.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="TokiSonaInterpreter\core_dictionary.txt" />
-    <Text Include="TokiSonaInterpreter\syntax.txt" />
     <Text Include="TokiSonaInterpreter\TokiSonaFeatures.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tslex.hpp" />
+    <ClInclude Include="wyrd.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

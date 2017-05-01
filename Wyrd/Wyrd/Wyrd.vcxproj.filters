@@ -24,28 +24,28 @@
     <None Include="TokiSonaInterpreter\DesignDocument.html">
       <Filter>Documentation</Filter>
     </None>
+    <None Include="coreRootMorphology.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="syntax.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Testing\driver.cpp">
       <Filter>Testing</Filter>
     </ClCompile>
-    <ClCompile Include="tslex.cpp">
+    <ClCompile Include="wyrd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="TokiSonaInterpreter\syntax.txt">
-      <Filter>Documentation</Filter>
-    </Text>
     <Text Include="TokiSonaInterpreter\TokiSonaFeatures.txt">
-      <Filter>Documentation</Filter>
-    </Text>
-    <Text Include="TokiSonaInterpreter\core_dictionary.txt">
       <Filter>Documentation</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tslex.hpp">
+    <ClInclude Include="wyrd.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
