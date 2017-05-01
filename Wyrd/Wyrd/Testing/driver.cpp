@@ -3,6 +3,7 @@
  * Date Created: 02/27/2017
  */
 #include <iostream>
+#include <fstream>
 #include "json.hpp"
 #include "wyrd.hpp"
 
