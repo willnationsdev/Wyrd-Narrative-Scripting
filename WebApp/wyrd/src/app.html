@@ -1,10 +1,10 @@
-<template>
+<template>  
     <nav>
         <ul>
-            <li repeat.for="row of router.navigation">
+            <li repeat.for = "row of router.navigation">
                 <a href.bind = "row.href">${row.title}</a>
             </li>
         </ul>
-    </nav>
+    <nav>
     <router-view></router-view>
 </template>

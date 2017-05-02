@@ -45,5 +45,11 @@
     "karma-jasmine": "^1.0.2",
     "karma-typescript-preprocessor": "^0.2.1",
     "@types/jasmine": "^2.2.0"
+  },
+  "jspm": {
+    "dependencies": {},
+    "devDependencies": {
+      "typescript": "npm:typescript@^2.0.7"
+    }
   }
 }
