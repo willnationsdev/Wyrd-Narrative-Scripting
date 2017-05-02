@@ -1,14 +1,14 @@
 import {RouterConfiguration, Router} from 'aurelia-router';
 import {inject} from 'aurelia-framework';
-import {Neo4jUtility} from './wyrd-neo4j-utility';
-//import * as neo4j from 'neo4j-typescript';
+import * as neo4j from 'neo4j-typescript';
+import {Neo4jUtility} from './tools/wyrd-neo4j-utility';
 
 export class App {
 
   // The Router responsible for re-routing web traffic to the App.
   public router: Router;
 
-  /*
+/*
   // The Neo4j database configuration object.
   // Defines access methodology and credentials.
   //
@@ -25,7 +25,7 @@ export class App {
     // The port in which to find the neo4j object
     port: 7474
   };
-  */
+*/
 
   //
   // configureRouter
