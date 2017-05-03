@@ -9,7 +9,6 @@
 #include <string>   //std::string
 #include <fstream>  //std::ifstream
 #include <vector>   //std::vector
-#include <algorithm> //std::find
 #include <unordered_map> //std::unordered_map
 #include "json.hpp" //json
 
@@ -50,161 +49,105 @@ namespace wyrd {
 
         typedef std::vector<std::string> Tags;
 
-        struct Reader {
+        struct Rule {
 
+            Rule(json* syntax, json* form, Tags& tags) 
+              : _syntax(syntax), _form(form), _tags(tags) {
 
-            Reader(std::string name, json* syntax, json* form, Tags& tags) 
-              : name(name), syntax(syntax), form(form), tags(tags) {
-
-                if (!syntax) {
+                if (!_syntax) {
                     throw std::exception("bad syntax passed to reader");
                 }
 
-                if (!form) {
+                if (!_form) {
                     throw std::exception("bad form passed to reader");
                 }
 
-                *syntax = (*syntax)["syntax"];
+                *_syntax = (*_syntax)["syntax"];
             }
 
             /**
-             * eat()
+             * function call operator()
              * 
              * 1) Extracts rules for what should be consumed from JSON
              * 2) Acquires a list of characters permitted for each type of
              *    "following" item.
              * 3) checks whether the rules are fulfilled such that the proper
              *    sequence of each character type is encountered.
+             * 4) Returns an iterator to the position of the character AFTER
+             *    a successful validation; therefore, returning the START
+             *    position indicates a FAILURE to verify the rule.
              *
              * @param start The iterator marking our start position
              * @param end The iterator marking the end of the data.
+             * @param outSuccess a flag to notify the calling context of
+             *        success or failure since there is no way to do so from
+             *        just the iterator return value and it's MORE messy to
+             *        invent a struct to return simply for this one function.
              * @return An iterator to either the next location if we 
              *         successfully "ate" any elements or an iterator to the 
              *         start location if we failed to "eat" anything.
              * @sideeffect tags The tags object will be updated with a new
              *         element containing the value of anything "eaten".
              */
-            CIter eat(CIter start, CIter end) {
+            CIter operator()(CIter start, CIter end, bool& outSuccess) {
+                outSuccess = true;
 
                 if (start == end) {
                     return start;
                 }
 
                 CIter current = start;
-                auto originalCharacters = (*form)["prefixes"];
-                std::string element;
+                auto originalCharacters = (*_form)["prefixes"];
                 std::string s(&*current++);
-
-                if (originalCharacters.find(s) != originalCharacters.end()) {
-                    element += s;
-                }
-                else {
+                if (originalCharacters.find(s) == originalCharacters.end()) {
+                    outSuccess = false;
                     return start; //not even in this category. Report failure.
                 }
-                //Don't check for "end" here since some forms will have no
-                //follow-up rules and therefore would be perfectly fine
-                //followed by the end of the data.
 
-                for (auto rule : (*form)["followedBy"]) {
+                for (auto jsonRule : (*_form)["followedBy"]) {
 
-                    std::vector<std::string> path = rule["path"];
-                    json characterList;
+                    std::vector<std::string> path = jsonRule["path"];
+                    json validChars;
 
                     if (path.size() >= 1) {
 
                         std::string key = path[0];
-                        characterList = (*syntax)[key]["forms"];
+                        validChars = (*_syntax)[key]["forms"];
                         std::string subgroup = "default";
 
                         if (path.size() >= 2) {
-
                             subgroup = path[1];
-                        }
+                        } //ignore everything beyond the first two entries
 
-                        characterList = characterList[subgroup]["prefixes"];
+                        validChars = validChars[subgroup]["prefixes"];
                     }
                     else {
+                        outSuccess = false;
                         return start; //Done. Rules exist, but can't get group.
                     }
                     //Assuming we found the first character...
-                    char c = (uint64_t)rule["condition"];
+                    char condition = (uint64_t)jsonRule["condition"];
+                    auto original = current;
 
                     //Evaluate the content differently based on what condition
                     //has been set for the rule.
-                    switch (c) {
+                    switch (condition) {
                     case '?':
-                        //if there is nothing, then stop already
-                        if (current != end) {
-
-                            //Grab the character and increment the iterator
-                            s = &*current++;
-
-                            //If this is a character we are looking for
-                            if (characterList.find(s) != characterList.end()) {
-
-                                //add it to the segment
-                                element += s;
-                            }
-                        }
-                        //move forward even if we don't find anything
+                        //Attempt to advance once
+                        current += advance(validChars, current, end, 1);
                         break;
                     case '*':
-
-                        //if there is nothing, then stop already
-                        if (current != end) {
-
-                            //Grab the character and increment the iterator
-                            s = &*current++;
-
-                            //If this is a character we are looking for
-                            while (characterList.find(s) != 
-                                    characterList.end()) {
-
-                                //add it to the segment
-                                element += s;
-
-                                //check whether the current character is valid
-                                if (current == end) {
-
-                                    //if not, stop where we are
-                                    break;
-                                }
-                                //if so, grab the character and increment
-                                s = &*current++;
-                            }
-                        }
-                        //move forward even if we don't find anything
+                        //Attempt to advance as much as possible
+                        current += advance(validChars, current, end);
                         break;
                     case '+':
-                        //Check if a first character exists
-                        if (current == end) {
+                        //Attempt to advance at least once
+                        original = current;
+                        current += advance(validChars, current, end, 1);
+                        current += advance(validChars, current, end);
+                        if (original == current) {
+                            outSuccess = false;
                             return start;
-                        }
-                        //Grab the first character
-                        s = &*current++;
-                        //Ensure at least one is captured properly
-                        if (characterList.find(s) != characterList.end()) {
-                            //since it's there, add it to our segment
-                            element += s;
-                            //prep the next character
-                            //don't increment yet to check next while condition
-                            if (current != end) {
-                                s = &*current++;
-                            }
-                            else {
-                                break; //confirmed 1 character minimum. End.
-                            }
-                        }
-                        else {
-                            return start; //there isn't even one character
-                        }
-                        //
-                        while (characterList.find(s) != characterList.end()) {
-                            element += s;
-                            if (current == end) {
-                                break;
-                            }
-                            s = &*current++;
                         }
                         break;
                     case '1':
@@ -216,32 +159,49 @@ namespace wyrd {
                     case '7':
                     case '8':
                     case '9':
-                        if (current == end) {
+                        current += advance(validChars, current, end, condition);
+                        //current MUST advance exactly c times, otherwise fail
+                        if (current != current + (condition-'1'+1)) {
+                            outSuccess = false;
                             return start;
                         }
-                        for (int i = 0; i < c && current != end; ++i) {
-                            s = &*current++;
-                            element += s;
-                        }
+                        break;
+                    default:
+                        break;
                     }
 
-                    tags.push_back(element);
-                    return current;
-                }
+                } //end for each follow-up rule
+
+                return current;
             }
 
-            Tags tags;
-            std::string name;
-            json* syntax;
-            json* form;
+        private:
+            uint8_t advance(const Collection& characterList, CIter start, 
+                const CIter& end, uint8_t occurrences = -1) {
+
+                CIter current = start;
+                uint8_t result = 0;
+                while (current != end && occurrences != 0 &&
+                    find(characterList, *current++) != characterList.end()) {
+
+                    result++;
+                    occurrences--;
+                }
+                return result;
+            }
+
+            Tags _tags;
+            json* _syntax;
+            json* _form;
         };
 
-        typedef std::vector<Reader> ReaderList;
+        typedef std::vector<Rule> RuleList;
 
-        template <typename ReaderCollection = ReaderList>
-        static ReaderCollection generateReaders(const std::string& syntaxJsonFile = "syntax.json") {
+        template <typename Rules = RuleList>
+        static Rules generateRules(const std::string& 
+                syntaxJsonFile = "syntax.json") {
 
-            ReaderCollection readers;
+            Rules rules;
 
             std::ifstream file(syntaxJsonFile);
             if (!file.is_open()) {
@@ -259,11 +219,11 @@ namespace wyrd {
                         category["name"] : 
                         form["name"];
 
-                    readers.push_back(Reader(formName, &j, &form, tags));
+                    rules.push_back(Rule(formName, &j, &form, tags));
                 }
             }
 
-            return readers;
+            return rules;
         }
 
         template <typename DataOutput, typename ReaderCollection = ReaderList>
@@ -277,15 +237,26 @@ namespace wyrd {
 
     struct WyrdParser {
 
-        template <typename DataOutput, typename DataReaderCollection>
-        static DataOutput parse(const std::string::const_iterator& start, 
-                const std::string::const_iterator& end) {
+        template <typename DataOutput, typename Rules>
+        static DataOutput&& parse(CIter start, const CIter& end) {
 
-            DataReaderCollection readers = WyrdSyntax::generateReaders();
+            Rules rules = WyrdSyntax::generateRules();
+            CIter current = start;
+            DataOutput toReturnData;
 
-            for (auto reader : syntaxReader) {
+            bool outSuccess = false;
+            for (auto rule : rules) {
+                current = rule(current, end, outSuccess);
+                if (!outSuccess) break; //stop early
+                else {
 
+                }
             }
+            if (!outSuccess) return DataOutput();
+
+
+
+            //
 
             /*
             //Initializations
@@ -427,20 +398,21 @@ namespace wyrd {
             */
         }
 
-        private:
-            //Don't want to have to #include <algorithm>, so just writing my
-            //own quick find method
-            static Collection::const_iterator find(const Collection& type, const Symbol& val)
-            {
-                auto first = type.cbegin();
-                auto last = type.cend();
-                while (first != last) {
-                    if (*first == val) return first;
-                    ++first;
-                }
-                return last;
-            }
     };
+
+    //Don't want to have to #include <algorithm>, so just writing my
+    //own quick find method
+    //? Didn't work as a template for some reason?
+    static Collection::const_iterator find(const Collection& type, const Symbol& val)
+    {
+        auto first = type.cbegin();
+        auto last = type.cend();
+        while (first != last) {
+            if (*first == val) return first;
+            ++first;
+        }
+        return last;
+    }
 
 }
 

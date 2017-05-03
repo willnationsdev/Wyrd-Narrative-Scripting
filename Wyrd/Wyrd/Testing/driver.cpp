@@ -31,23 +31,14 @@ int main()
     }
     */
 
-    //file
-    std::ifstream file("syntax.json");
-    if (!file.is_open()) {
-        std::cout << "could not open file" << std::endl;
-        std::cin.get();
-        return 0;
+    auto rules = wyrd::WyrdSyntax::generateRules("syntax.json");
+    std::string line;
+    std::getline(std::cin, line);
+    while (line != "quit") {
+
+        std::getline(std::cin, line);
     }
 
-    json j;
-    file >> j;
-
-    auto readers = wyrd::WyrdSyntax::generateReaders("syntax.json");
-
-    for (auto item : j["syntaxConcepts"]) {
-        auto value = item.size();
-        std::cout << std::setw(4) << value << std::endl;
-    }
 
     std::cin.get();
     return 0;
