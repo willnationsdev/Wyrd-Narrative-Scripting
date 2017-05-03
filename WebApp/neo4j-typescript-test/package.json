@@ -1,0 +1,15 @@
+{
+  "name": "neo4j-typescript-test",
+  "version": "1.0.0",
+  "description": "testing a project with neo4j-driver and neo4j-typescript",
+  "main": "main.js",
+  "dependencies": {
+    "neo4j-driver": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Will Nations",
+  "license": "MIT"
+}
