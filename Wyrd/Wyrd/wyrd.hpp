@@ -28,6 +28,7 @@ namespace wyrd {
 
     typedef uint8_t Symbol;
     typedef std::vector<Symbol> Collection;
+    typedef std::string::const_iterator CIter;
 
     struct JsonUtility {
         template <typename T>
@@ -51,7 +52,6 @@ namespace wyrd {
 
         struct Reader {
 
-            typedef std::string::const_iterator CIter;
 
             Reader(std::string name, json* syntax, json* form, Tags& tags) 
               : name(name), syntax(syntax), form(form), tags(tags) {
@@ -236,18 +236,13 @@ namespace wyrd {
             json* form;
         };
 
-        template <typename Reader = Reader>
-        struct SyntaxReader {
+        typedef std::vector<Reader> ReaderList;
 
-            SyntaxReader() {
+        template <typename ReaderCollection = ReaderList>
+        static ReaderCollection generateReaders(const std::string& syntaxJsonFile = "syntax.json") {
 
-            }
+            ReaderCollection readers;
 
-            std::vector<Reader> readers;
-        };
-
-        template <typename SyntaxReader = SyntaxReader<>>
-        SyntaxReader generate(const std::string& syntaxJsonFile = "syntax.json") {
             std::ifstream file(syntaxJsonFile);
             if (!file.is_open()) {
                 return false;
@@ -256,8 +251,6 @@ namespace wyrd {
             json j;
             file >> j;
 
-            SyntaxReader syntaxReader;
-
             for (auto category : j["syntax"]) {
                 for (auto form : category["forms"]) {
 
@@ -265,20 +258,36 @@ namespace wyrd {
                         form["name"] == "default" ? 
                         category["name"] : 
                         form["name"];
-                    syntaxReader.addReader(formName, form);
+
+                    readers.push_back(Reader(formName, &j, &form, tags));
                 }
             }
 
-            return syntaxReader;
+            return readers;
+        }
+
+        template <typename DataOutput, typename ReaderCollection = ReaderList>
+        static Tags parse(ReaderCollection readers, CIter start, CIter end) {
+            Tags tags;
+
+            return tags;
+
         }
     };
 
     struct WyrdParser {
 
-        template <typename DataOutput>
+        template <typename DataOutput, typename DataReaderCollection>
         static DataOutput parse(const std::string::const_iterator& start, 
                 const std::string::const_iterator& end) {
 
+            DataReaderCollection readers = WyrdSyntax::generateReaders();
+
+            for (auto reader : syntaxReader) {
+
+            }
+
+            /*
             //Initializations
             std::string::const_iterator it = start;
 
@@ -415,6 +424,7 @@ namespace wyrd {
             }
 
             return data;
+            */
         }
 
         private:

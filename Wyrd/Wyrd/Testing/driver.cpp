@@ -41,6 +41,9 @@ int main()
 
     json j;
     file >> j;
+
+    auto readers = wyrd::WyrdSyntax::generateReaders("syntax.json");
+
     for (auto item : j["syntaxConcepts"]) {
         auto value = item.size();
         std::cout << std::setw(4) << value << std::endl;
