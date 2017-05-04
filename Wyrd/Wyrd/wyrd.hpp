@@ -28,6 +28,7 @@ namespace wyrd {
     typedef uint8_t Symbol;
     typedef std::vector<Symbol> Collection;
     typedef std::string::const_iterator CIter;
+    typedef std::vector<std::string> Tags;
 
     struct JsonUtility {
         template <typename T>
@@ -47,12 +48,10 @@ namespace wyrd {
 
     struct WyrdSyntax {
 
-        typedef std::vector<std::string> Tags;
-
         struct Rule {
 
-            Rule(json* syntax, json* form, Tags& tags) 
-              : _syntax(syntax), _form(form), _tags(tags) {
+            Rule(json syntax, json form) 
+              : _syntax(syntax), _form(form) {
 
                 if (!_syntax) {
                     throw std::exception("bad syntax passed to reader");
@@ -62,7 +61,7 @@ namespace wyrd {
                     throw std::exception("bad form passed to reader");
                 }
 
-                *_syntax = (*_syntax)["syntax"];
+                _syntax = (_syntax)["syntax"];
             }
 
             /**
@@ -97,14 +96,14 @@ namespace wyrd {
                 }
 
                 CIter current = start;
-                auto originalCharacters = (*_form)["prefixes"];
+                auto originalCharacters = (_form)["prefixes"];
                 std::string s(&*current++);
                 if (originalCharacters.find(s) == originalCharacters.end()) {
                     outSuccess = false;
                     return start; //not even in this category. Report failure.
                 }
 
-                for (auto jsonRule : (*_form)["followedBy"]) {
+                for (auto jsonRule : (_form)["followedBy"]) {
 
                     std::vector<std::string> path = jsonRule["path"];
                     json validChars;
@@ -112,7 +111,7 @@ namespace wyrd {
                     if (path.size() >= 1) {
 
                         std::string key = path[0];
-                        validChars = (*_syntax)[key]["forms"];
+                        validChars = (_syntax)[key]["forms"];
                         std::string subgroup = "default";
 
                         if (path.size() >= 2) {
@@ -126,7 +125,7 @@ namespace wyrd {
                         return start; //Done. Rules exist, but can't get group.
                     }
                     //Assuming we found the first character...
-                    char condition = (uint64_t)jsonRule["condition"];
+                    Symbol condition = (int)jsonRule["condition"];
                     auto original = current;
 
                     //Evaluate the content differently based on what condition
@@ -182,7 +181,7 @@ namespace wyrd {
                 CIter current = start;
                 uint8_t result = 0;
                 while (current != end && occurrences != 0 &&
-                    find(characterList, *current++) != characterList.end()) {
+                    find(characterList, *current++) != characterList.cend()) {
 
                     result++;
                     occurrences--;
@@ -190,9 +189,8 @@ namespace wyrd {
                 return result;
             }
 
-            Tags _tags;
-            json* _syntax;
-            json* _form;
+            json _syntax;
+            json _form;
         };
 
         typedef std::vector<Rule> RuleList;
@@ -205,58 +203,75 @@ namespace wyrd {
 
             std::ifstream file(syntaxJsonFile);
             if (!file.is_open()) {
-                return false;
+                throw std::exception((std::string("failed to open file: ") +
+                    syntaxJsonFile).c_str());
             }
 
             json j;
             file >> j;
 
-            for (auto category : j["syntax"]) {
-                for (auto form : category["forms"]) {
+            json syntaxForms = j["syntax"];
+            for (auto category : syntaxForms) {
+                std::map<std::string, json> a = category;
+                for (auto form : a.at("forms")) {
 
+                    /*
                     std::string formName = 
                         form["name"] == "default" ? 
                         category["name"] : 
-                        form["name"];
+                        form["name"];*/
 
-                    rules.push_back(Rule(formName, &j, &form, tags));
+                    rules.push_back(Rule(&j,&form));
                 }
             }
 
             return rules;
         }
 
-        template <typename DataOutput, typename ReaderCollection = ReaderList>
-        static Tags parse(ReaderCollection readers, CIter start, CIter end) {
-            Tags tags;
+        //Don't want to have to #include <algorithm>, so just writing my
+        //own quick find method
+        //? Didn't work as a template for some reason?
+        static Collection::const_iterator find(const Collection& type, 
+            Symbol val) {
 
-            return tags;
-
+            auto first = type.cbegin();
+            auto last = type.cend();
+            while (first != last) {
+                if (*first == val) return first;
+                ++first;
+            }
+            return last;
         }
+
+
+
     };
 
     struct WyrdParser {
 
-        template <typename DataOutput, typename Rules>
-        static DataOutput&& parse(CIter start, const CIter& end) {
+        template <typename DataOutput = Tags,
+            typename Rules = WyrdSyntax::RuleList>
+            static DataOutput parse(std::string toParse) {
 
-            Rules rules = WyrdSyntax::generateRules();
+            CIter start = toParse.cbegin();
+            CIter end = toParse.cend();
+            Rules rules = WyrdSyntax::generateRules<Rules>();
             CIter current = start;
             DataOutput toReturnData;
 
             bool outSuccess = false;
             for (auto rule : rules) {
-                current = rule(current, end, outSuccess);
+                auto endOfSegment = rule(current, end, outSuccess);
                 if (!outSuccess) break; //stop early
                 else {
-
+                    toReturnData.push_back(
+                        DataOutput::value_type(current, endOfSegment));
                 }
             }
-            if (!outSuccess) return DataOutput();
 
-
-
-            //
+            return outSuccess ? toReturnData : DataOutput();
+        }
+    };
 
             /*
             //Initializations
@@ -396,23 +411,6 @@ namespace wyrd {
 
             return data;
             */
-        }
-
-    };
-
-    //Don't want to have to #include <algorithm>, so just writing my
-    //own quick find method
-    //? Didn't work as a template for some reason?
-    static Collection::const_iterator find(const Collection& type, const Symbol& val)
-    {
-        auto first = type.cbegin();
-        auto last = type.cend();
-        while (first != last) {
-            if (*first == val) return first;
-            ++first;
-        }
-        return last;
-    }
 
 }
 

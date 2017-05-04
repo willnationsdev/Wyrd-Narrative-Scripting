@@ -36,6 +36,11 @@ int main()
     std::getline(std::cin, line);
     while (line != "quit") {
 
+        wyrd::Tags tags = 
+            wyrd::WyrdParser::parse(line);
+        for (size_t i = 0; i < tags.size(); ++i) {
+            std::cout << i << ": " << tags[i] << std::endl;
+        }
         std::getline(std::cin, line);
     }
 
