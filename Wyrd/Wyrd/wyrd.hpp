@@ -53,14 +53,6 @@ namespace wyrd {
             Rule(json syntax, json form) 
               : _syntax(syntax), _form(form) {
 
-                if (!_syntax) {
-                    throw std::exception("bad syntax passed to reader");
-                }
-
-                if (!_form) {
-                    throw std::exception("bad form passed to reader");
-                }
-
                 _syntax = (_syntax)["syntax"];
             }
 
@@ -182,7 +174,6 @@ namespace wyrd {
                 uint8_t result = 0;
                 while (current != end && occurrences != 0 &&
                     find(characterList, *current++) != characterList.cend()) {
-
                     result++;
                     occurrences--;
                 }
@@ -196,32 +187,17 @@ namespace wyrd {
         typedef std::vector<Rule> RuleList;
 
         template <typename Rules = RuleList>
-        static Rules generateRules(const std::string& 
-                syntaxJsonFile = "syntax.json") {
+        static Rules generateRules(json syntaxForms) {
 
             Rules rules;
 
-            std::ifstream file(syntaxJsonFile);
-            if (!file.is_open()) {
-                throw std::exception((std::string("failed to open file: ") +
-                    syntaxJsonFile).c_str());
-            }
+            for (json category : syntaxForms) {
+                for (json form : category["forms"]) {
+                
+                    std::
 
-            json j;
-            file >> j;
-
-            json syntaxForms = j["syntax"];
-            for (auto category : syntaxForms) {
-                std::map<std::string, json> a = category;
-                for (auto form : a.at("forms")) {
-
-                    /*
-                    std::string formName = 
-                        form["name"] == "default" ? 
-                        category["name"] : 
-                        form["name"];*/
-
-                    rules.push_back(Rule(&j,&form));
+                    Rule rule(syntaxForms, form);
+                    rules.push_back(rule);
                 }
             }
 
@@ -242,20 +218,24 @@ namespace wyrd {
             }
             return last;
         }
-
-
-
     };
 
     struct WyrdParser {
 
         template <typename DataOutput = Tags,
             typename Rules = WyrdSyntax::RuleList>
-            static DataOutput parse(std::string toParse) {
+            static DataOutput parse(std::string toParse, json syntax) {
+
+            Rules rules = WyrdSyntax::generateRules<Rules>(syntaxJson);
+            return parse<DataOutput, Rules>(toParse, rules);
+        }
+
+        template <typename DataOutput = Tags,
+            typename Rules = WyrdSyntax::RuleList>
+            static DataOutput parse(std::string toParse, Rules rules) {
 
             CIter start = toParse.cbegin();
             CIter end = toParse.cend();
-            Rules rules = WyrdSyntax::generateRules<Rules>();
             CIter current = start;
             DataOutput toReturnData;
 

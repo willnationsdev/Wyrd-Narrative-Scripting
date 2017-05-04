@@ -31,13 +31,23 @@ int main()
     }
     */
 
-    auto rules = wyrd::WyrdSyntax::generateRules("syntax.json");
+    std::ifstream syntaxFile("syntax.json");
+
+    if (!syntaxFile.is_open()) {
+        assert(0 && "Could not open syntax file");
+    }
+
+    json syntax;
+    syntaxFile >> syntax;
+    syntax = syntax["syntax"];
+
+    auto rules = wyrd::WyrdSyntax::generateRules(syntax);
     std::string line;
     std::getline(std::cin, line);
     while (line != "quit") {
 
         wyrd::Tags tags = 
-            wyrd::WyrdParser::parse(line);
+            wyrd::WyrdParser::parse<>(line, rules);
         for (size_t i = 0; i < tags.size(); ++i) {
             std::cout << i << ": " << tags[i] << std::endl;
         }
