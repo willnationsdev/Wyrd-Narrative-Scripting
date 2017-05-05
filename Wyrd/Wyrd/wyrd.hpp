@@ -44,9 +44,18 @@ namespace wyrd {
             }
             return json({});
         }
+
     };
 
     struct WyrdSyntax {
+
+        static json getCategoryValidChars(json category) {
+            json current = category;
+            //TODO: implement as recursive pattern with JSON.
+            std::string categoryName = category["name"];
+            for (json form : category)
+            std::string formName
+        }
 
         struct Rule {
 
@@ -85,9 +94,12 @@ namespace wyrd {
                 }
 
                 CIter current = start;
-                auto originalCharacters = (_form)["prefixes"];
-                std::string s(&*current++);
-                if (originalCharacters.find(s) == originalCharacters.end()) {
+                Collection originalCharacters;
+                for (std::string character : _form["validChars"]) {
+                    originalCharacters.push_back(character[0]);
+                }
+                Symbol s(*current++);
+                if (find(originalCharacters, s) == originalCharacters.end()) {
                     outSuccess = false;
                     return start; //not even in this category. Report failure.
                 }
@@ -100,14 +112,16 @@ namespace wyrd {
                     if (path.size() >= 1) {
 
                         std::string key = path[0];
-                        validChars = (_syntax)[key]["forms"];
+                        //TODO: Need to use the JsonUtility to search for key
+                        json forms = JsonUtility::findWhere(_syntax, key, "forms");
+                        validChars = forms["validChars"];
                         std::string subgroup = "default";
 
                         if (path.size() >= 2) {
                             subgroup = path[1];
                         } //ignore everything beyond the first two entries
 
-                        validChars = validChars[subgroup]["prefixes"];
+                        validChars = validChars[subgroup]["validChars"];
                     }
                     else {
                         outSuccess = false;

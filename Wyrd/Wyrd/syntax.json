@@ -1,115 +1,99 @@
 {
-  "syntax": [
-    {
-      "name": "prefixes",
-      "forms": [
-        {
-          "name": "default",
-          "prefixes": [ "a", "e", "i", "o", "u" ],
-          "followedBy": [
-            {
-              "path": [ "concepts" ],
-              "condition": "+"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "tags",
-      "forms": [
-        {
-          "name": "roots",
-          "prefixes": [ "m", "n", "p", "k", "t", "l", "h", "s", "v", "w", "j" ],
-          "followedBy": [
-            {
-              "path": [ "vowels" ],
-              "condition": "1"
-            },
-            {
-              "path": [ "tags", "roots" ],
-              "condition": "1"
-            },
-            {
-              "path": [ "vowels" ],
-              "condition": "1"
-            }
-          ]
-        },
-        {
-          "name": "particles",
-          "prefixes": [ "x", "f", "c", "z", "b" ],
-          "followedBy": [
-            {
-              "path": [ "vowels" ],
-              "condition": "1"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "vowels",
-      "forms": [
-        {
-          "name": "default",
-          "prefixes": [ "a", "e", "i", "o", "u", "y", "q" ],
-          "followedBy": [
-          ]
-        }
-      ]
-    },
-    {
-      "name": "expressions",
-      "forms": [
-        {
-          "name": "default",
-          "prefixes": [ ";" ],
-          "followedBy": [
-            {
-              "path": [ "vowels" ],
-              "condition": "+"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "endPunctuationRecursive",
-      "forms": [
-        {
-          "name": "default",
-          "prefixes": [ ".", "!", "?" ],
-          "followedBy": [
-            {
-              "path": [ "endPunctuationRecursive" ],
-              "condition": "*"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "endPunctuation",
-      "forms": [
-        {
-          "name": "default",
-          "prefixes": [ ":" ],
-          "followedBy": [
-          ]
-        }
-      ]
-    },
-    {
-      "name": "midPunctuation",
-      "forms": [
-        {
-          "name": "default",
-          "prefixes": [ ",", "\"", "'" ],
-          "followedBy": [
-          ]
-        }
-      ]
-    }
-  ]
+  "syntax": {
+    "name":  "syntax",
+    "forms": [
+      {
+        "name": "prefixes",
+        "forms": [ ],
+        "validChars": [ "a", "e", "i", "o", "u" ],
+        "followedBy": [
+          {
+            "path": [ "syntax", "tags" ],
+            "condition": "+"
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "forms": [
+          {
+            "name": "roots",
+            "forms": [ ],
+            "validChars": [ "m", "n", "p", "k", "t", "l", "h", "s", "v", "w", "j" ],
+            "followedBy": [
+              {
+                "path": [ "syntax", "vowels" ],
+                "condition": "1"
+              },
+              {
+                "path": [ "syntax", "tags", "roots" ],
+                "condition": "1"
+              },
+              {
+                "path": [ "syntax", "vowels" ],
+                "condition": "1"
+              }
+            ]
+          },
+          {
+            "name": "particles",
+            "forms": [ ],
+            "validChars": [ "x", "f", "c", "z", "b" ],
+            "followedBy": [
+              {
+                "path": [ "syntax", "vowels" ],
+                "condition": "1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "vowels",
+        "forms": [ ],
+        "validChars": [ "a", "e", "i", "o", "u", "y", "q" ],
+        "followedBy": [ ]
+      },
+      {
+        "name": "expressions",
+        "forms": [ ],
+        "validChars": [ ";" ],
+        "followedBy": [
+          {
+            "path": [ "syntax", "vowels" ],
+            "condition": "+"
+          }
+        ]
+      },
+      {
+        "name": "endPunctuationRecursive",
+        "forms": [ ],
+        "validChars": [ ".", "!", "?" ],
+        "followedBy": [
+          {
+            "path": [ "syntax", "endPunctuationRecursive" ],
+            "condition": "*"
+          }
+        ]
+      },
+      {
+        "name": "endPunctuation",
+        "forms": [ ],
+        "validChars": [ ":" ],
+        "followedBy": [ ]
+      },
+      {
+        "name": "midPunctuation",
+        "forms": [ ],
+        "validChars": [ ",", "\"", "'" ],
+        "followedBy": [ ]
+      }
+    ],
+    "validChars": [ 
+      "a", "e", "i", "o", "u", "y", "q",
+      "m", "n", "p", "k", "t", "l", "h", "s", "v", "w", "j",
+      "x", "f", "c", "z", "b", ";", ".", "!", "?", ":", ",", "\"", "'"
+    ],
+    "followedBy": [ ]
+  }
 }
