@@ -50,11 +50,8 @@ namespace wyrd {
 
         struct Rule {
 
-            Rule(json syntax, json form) 
-              : _syntax(syntax), _form(form) {
-
-                _syntax = (_syntax)["syntax"];
-            }
+            Rule(json syntax, json form)
+                : _syntax(syntax), _form(form) {}
 
             /**
              * function call operator()
@@ -194,8 +191,6 @@ namespace wyrd {
             for (json category : syntaxForms) {
                 for (json form : category["forms"]) {
                 
-                    std::
-
                     Rule rule(syntaxForms, form);
                     rules.push_back(rule);
                 }
