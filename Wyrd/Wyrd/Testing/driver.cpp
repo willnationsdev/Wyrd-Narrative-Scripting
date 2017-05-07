@@ -41,13 +41,12 @@ int main()
     syntaxFile >> syntax;
     json syntaxObject = syntax["syntax"];
 
-    auto rules = wyrd::WyrdSyntax::generateRules(syntaxObject);
     std::string line;
     std::getline(std::cin, line);
     while (line != "quit") {
 
         wyrd::Tags tags = 
-            wyrd::WyrdParser::parse<>(line, rules);
+            wyrd::WyrdParser::parse<>(line, syntaxObject);
         for (size_t i = 0; i < tags.size(); ++i) {
             std::cout << i << ": " << tags[i] << std::endl;
         }

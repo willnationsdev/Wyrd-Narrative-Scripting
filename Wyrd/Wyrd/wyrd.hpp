@@ -196,8 +196,6 @@ namespace wyrd {
 
         typedef std::vector<Rule> RuleVector;
         typedef std::vector<RuleVector> RuleSequences;
-        typedef std::unordered_map<Path, json> JsonByPath;
-        typedef std::unordered_map<Path, RuleVector> RulesByPath;
 
         class RuleSet {
         public:
@@ -211,7 +209,8 @@ namespace wyrd {
                     RuleVector rules;
                     for (json rule : ruleSequence) {
                         Path p = rule["characterSet"];
-                        Condition c = ((std::string)rule["condition"])[0];
+                        std::string s = rule["condition"];
+                        Condition c = s[0];
                         Characters ch = _characterMap.at(p);
                         rules.push_back(Rule(ch, c));
                     }

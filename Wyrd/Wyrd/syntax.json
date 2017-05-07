@@ -2,122 +2,122 @@
   "syntax": {
     "characterSets": [
       {
-        "name": [ "prefixes" ],
+        "name": "prefixes",
         "characters": "aeiou"
       },
       {
-        "name": [ "tags", "roots" ],
+        "name": "tags:roots",
         "characters": "mnpktlhsvwj"
       },
       {
-        "name": [ "tags", "particles" ],
+        "name": "tags:particles",
         "characters": "xzcfb"
       },
       {
-        "name": [ "vowels" ],
+        "name": "vowels",
         "characters": "aeiouyq"
       },
       {
-        "name": [ "endPunctuationMultiple" ],
+        "name": "endPunctuationMultiple",
         "characters": ".!?"
       },
       {
-        "name": [ "endPunctuation" ],
+        "name": "endPunctuation",
         "characters": ":"
       },
       {
-        "name": [ "midPunctuation" ],
+        "name": "midPunctuation",
         "characters": ",\"'"
       }
     ],
     "ruleSequences": [
       [
         {
-          "characterSet": [ "prefixes" ],
+          "characterSet": "prefixes",
           "condition": "1"
         },
         {
-          "characterSet": [ "tags" ],
+          "characterSet": "tags",
           "condition": "+"
         }
       ],
       [
         {
-          "characterSet": [ "tags", "roots" ],
+          "characterSet": "tags:roots",
           "condition": "1"
         },
         {
-          "characterSet": [ "vowels" ],
+          "characterSet": "vowels",
           "condition": "1"
         },
         {
-          "characterSet": [ "tags", "roots" ],
+          "characterSet": "tags:roots",
           "condition": "1"
         },
         {
-          "characterSet": [ "vowels" ],
+          "characterSet": "vowels",
           "condition": "1"
         }
       ],
       [
         {
-          "characterSet": [ "tags", "particles" ],
+          "characterSet": "tags:particles",
           "condition": "1"
         },
         {
-          "characterSet": [ "vowels" ],
+          "characterSet": "vowels",
           "condition": "1"
         }
       ],
       [
         {
-          "characterSet": [ "expression" ],
+          "characterSet": "expression",
           "condition": "1"
         },
         {
-          "characterSet": [ "vowels" ],
+          "characterSet": "vowels",
           "condition": "+"
         }
       ],
       [
         {
-          "characterSet": [ "endPunctuationMultiple" ],
+          "characterSet": "endPunctuationMultiple",
           "condition": "+"
         },
         {
-          "characterSet": [ "endPunctuation" ],
+          "characterSet": "endPunctuation",
           "condition": "!"
         },
         {
-          "characterSet": [ "midPunctuation" ],
-          "condition": "!"
-        }
-      ],
-      [
-        {
-          "characterSet": [ "endPunctuation" ],
-          "condition": "1"
-        },
-        {
-          "characterSet": [ "endPunctuationRecursive" ],
-          "condition": "!"
-        },
-        {
-          "characterSet": [ "midPunctuation" ],
+          "characterSet": "midPunctuation",
           "condition": "!"
         }
       ],
       [
         {
-          "characterSet": [ "midPunctuation" ],
+          "characterSet": "endPunctuation",
           "condition": "1"
         },
         {
-          "characterSet": [ "endPunctuation" ],
+          "characterSet": "endPunctuationRecursive",
           "condition": "!"
         },
         {
-          "characterSet": [ "endPunctuationRecursive" ],
+          "characterSet": "midPunctuation",
+          "condition": "!"
+        }
+      ],
+      [
+        {
+          "characterSet": "midPunctuation",
+          "condition": "1"
+        },
+        {
+          "characterSet": "endPunctuation",
+          "condition": "!"
+        },
+        {
+          "characterSet": "endPunctuationRecursive",
           "condition": "!"
         }
       ]
