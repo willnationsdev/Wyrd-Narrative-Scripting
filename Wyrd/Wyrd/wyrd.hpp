@@ -17,20 +17,24 @@ using nlohmann::json;
 
 namespace wyrd {
 
-    typedef uint32_t concept_t;
-    typedef uint8_t phoneme_t;
-    typedef std::string hieroglyph_t;
-
-    static const uint8_t NUM_VOWELS = 7;
-    static const uint8_t ROOT_LENGTH = 4;
-    static const uint8_t TAG_LENGTH = 2;
-
-    typedef uint8_t Symbol;
-    typedef std::vector<Symbol> Collection;
     typedef std::string::const_iterator CIter;
     typedef std::vector<std::string> Tags;
 
     struct JsonUtility {
+
+        /**
+         * findWhere
+         *
+         * Searches through an array-based JSON object "data" contains an 
+         * object with key "key" equal to value "val".
+         * 
+         * @param data The JSON object to search through. Must be an array of
+         *             objects.
+         * @param key The string key name to check against in each object.
+         * @param val The value to compare against each object's key-value.
+         * @param The json object in the array that contains the key with the
+         *        given value.
+         */
         template <typename T>
         static json findWhere(json data, std::string key, T& val) {
             if (!data.is_array()) {
@@ -49,357 +53,212 @@ namespace wyrd {
 
     struct WyrdSyntax {
 
-        static json getCategoryValidChars(json category) {
-            json current = category;
-            //TODO: implement as recursive pattern with JSON.
-            std::string categoryName = category["name"];
-            for (json form : category)
-            std::string formName
-        }
+        typedef std::vector<std::string> Path;
+        typedef std::string Characters;
+        typedef std::unordered_map<Path, Characters> CharacterMap;
+        typedef unsigned char Condition;
+
+        struct RuleResponse {
+            RuleResponse(CIter ep, bool s) : endingPosition(ep), success(s) {}
+            CIter endingPosition;
+            bool success;
+        };
 
         struct Rule {
 
-            Rule(json syntax, json form)
-                : _syntax(syntax), _form(form) {}
+            /**
+             * Custom Constructor
+             * 
+             * Initializes variables that the Rule will need.
+             * 
+             * @param characterSet The string of characters this Rule will
+             *                     expect to encounter.
+             * @param condition The conditions in which this Rule will expect
+             *                  to encounter the characterSet characters.
+             */
+            Rule(Characters characters, Condition condition)
+                : _characters(characters), _condition(condition) {}
 
             /**
              * function call operator()
              * 
-             * 1) Extracts rules for what should be consumed from JSON
-             * 2) Acquires a list of characters permitted for each type of
-             *    "following" item.
-             * 3) checks whether the rules are fulfilled such that the proper
-             *    sequence of each character type is encountered.
-             * 4) Returns an iterator to the position of the character AFTER
-             *    a successful validation; therefore, returning the START
-             *    position indicates a FAILURE to verify the rule.
+             * Checks whether the string starting at start has characters in
+             * _characterSet in the sequence described by _condition.
              *
              * @param start The iterator marking our start position
              * @param end The iterator marking the end of the data.
-             * @param outSuccess a flag to notify the calling context of
-             *        success or failure since there is no way to do so from
-             *        just the iterator return value and it's MORE messy to
-             *        invent a struct to return simply for this one function.
+            *        invent a struct to return simply for this one function.
              * @return An iterator to either the next location if we 
              *         successfully "ate" any elements or an iterator to the 
              *         start location if we failed to "eat" anything.
-             * @sideeffect tags The tags object will be updated with a new
-             *         element containing the value of anything "eaten".
              */
-            CIter operator()(CIter start, CIter end, bool& outSuccess) {
-                outSuccess = true;
+            RuleResponse operator()(CIter start, CIter end) {
 
                 if (start == end) {
-                    return start;
+                    return RuleResponse(start,false);
                 }
 
                 CIter current = start;
-                Collection originalCharacters;
-                for (std::string character : _form["validChars"]) {
-                    originalCharacters.push_back(character[0]);
-                }
-                Symbol s(*current++);
-                if (find(originalCharacters, s) == originalCharacters.end()) {
-                    outSuccess = false;
-                    return start; //not even in this category. Report failure.
+                //If we were unable to locate the valid character list,
+                //then don't even bother continuing.
+                if (!_characters.size()) {
+                    return RuleResponse(start,false); 
                 }
 
-                for (auto jsonRule : (_form)["followedBy"]) {
+                //Keep track of the original position, for minimum-length
+                //Rules.
+                auto original = current;
 
-                    std::vector<std::string> path = jsonRule["path"];
-                    json validChars;
-
-                    if (path.size() >= 1) {
-
-                        std::string key = path[0];
-                        //TODO: Need to use the JsonUtility to search for key
-                        json forms = JsonUtility::findWhere(_syntax, key, "forms");
-                        validChars = forms["validChars"];
-                        std::string subgroup = "default";
-
-                        if (path.size() >= 2) {
-                            subgroup = path[1];
-                        } //ignore everything beyond the first two entries
-
-                        validChars = validChars[subgroup]["validChars"];
+                //Evaluate the content differently based on what condition
+                //has been set for the rule.
+                switch (_condition) {
+                case '?':
+                    //Attempt to advance once.
+                    current += advance(_characters, current, end, 1);
+                    break;
+                case '*':
+                    //Attempt to advance as much as possible.
+                    current += advance(_characters, current, end);
+                    break;
+                case '+':
+                    //Attempt to advance as much as possible, but check
+                    //to make sure that we at least moved once.
+                    original = current;
+                    current += advance(_characters, current, end);
+                    if (original == current) {
+                        return RuleResponse(start,false);
                     }
-                    else {
-                        outSuccess = false;
-                        return start; //Done. Rules exist, but can't get group.
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    //Attempt to advance exactly "condition" times.
+                    current += 
+                        advance(_characters, current, end, _condition);
+
+                    //If advancement was not precise, then this string does
+                    //not conform to this rule.
+                    if (current != current + (_condition-'1'+1)) {
+                        return RuleResponse(start,false);
                     }
-                    //Assuming we found the first character...
-                    Symbol condition = (int)jsonRule["condition"];
-                    auto original = current;
-
-                    //Evaluate the content differently based on what condition
-                    //has been set for the rule.
-                    switch (condition) {
-                    case '?':
-                        //Attempt to advance once
-                        current += advance(validChars, current, end, 1);
-                        break;
-                    case '*':
-                        //Attempt to advance as much as possible
-                        current += advance(validChars, current, end);
-                        break;
-                    case '+':
-                        //Attempt to advance at least once
-                        original = current;
-                        current += advance(validChars, current, end, 1);
-                        current += advance(validChars, current, end);
-                        if (original == current) {
-                            outSuccess = false;
-                            return start;
-                        }
-                        break;
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        current += advance(validChars, current, end, condition);
-                        //current MUST advance exactly c times, otherwise fail
-                        if (current != current + (condition-'1'+1)) {
-                            outSuccess = false;
-                            return start;
-                        }
-                        break;
-                    default:
-                        break;
+                    break;
+                case '!':
+                    if (_characters.find(*current) != std::string::npos) {
+                        return RuleResponse(start, false);
                     }
+                default:
+                    return RuleResponse(start, false);
+                }
 
-                } //end for each follow-up rule
-
-                return current;
+                //Notify the calling context of where we stopped, i.e. the
+                //start of the NEXT segment.
+                return RuleResponse(current,true);
             }
 
         private:
-            uint8_t advance(const Collection& characterList, CIter start, 
+            /**
+             * advance
+             *
+             * Advances as far into the (start, end) string as it can, checking
+             * that characters are contained within characterList at each step.
+             * It will continue until it encounters a character NOT in the list
+             * or until it has encountered "occurrences" number of characters.
+             *
+             * @param characterList The list of characters to check against.
+             * @param start The starting string iterator.
+             * @param end The ending string iterator.
+             * @param occurrences The number of characters to read before 
+             *                    stopping.
+             * @return The number of characters that were read.
+             */
+            int advance(const std::string& characterList, CIter start, 
                 const CIter& end, uint8_t occurrences = -1) {
 
                 CIter current = start;
-                uint8_t result = 0;
+                int result = 0;
                 while (current != end && occurrences != 0 &&
-                    find(characterList, *current++) != characterList.cend()) {
+                    characterList.find(*current++) != std::string::npos) {
                     result++;
                     occurrences--;
                 }
                 return result;
             }
 
-            json _syntax;
-            json _form;
+            Characters _characters;
+            Condition _condition;
         };
 
-        typedef std::vector<Rule> RuleList;
+        typedef std::vector<Rule> RuleVector;
+        typedef std::vector<RuleVector> RuleSequences;
+        typedef std::unordered_map<Path, json> JsonByPath;
+        typedef std::unordered_map<Path, RuleVector> RulesByPath;
 
-        template <typename Rules = RuleList>
-        static Rules generateRules(json syntaxForms) {
-
-            Rules rules;
-
-            for (json category : syntaxForms) {
-                for (json form : category["forms"]) {
-                
-                    Rule rule(syntaxForms, form);
-                    rules.push_back(rule);
+        class RuleSet {
+        public:
+            RuleSet(json syntax) {
+                for (json characterSet : syntax["characterSets"]) {
+                    Path path = characterSet["name"];
+                    std::string characters = characterSet["characters"];
+                    _characterMap[path] = characters;
+                }
+                for (json ruleSequence : syntax["ruleSequences"]) {
+                    RuleVector rules;
+                    for (json rule : ruleSequence) {
+                        Path p = rule["characterSet"];
+                        Condition c = ((std::string)rule["condition"])[0];
+                        Characters ch = _characterMap.at(p);
+                        rules.push_back(Rule(ch, c));
+                    }
+                    _ruleSequences.push_back(rules);
                 }
             }
 
-            return rules;
-        }
+            inline const std::vector<RuleVector>& getRuleSequences() 
+                const noexcept {
 
-        //Don't want to have to #include <algorithm>, so just writing my
-        //own quick find method
-        //? Didn't work as a template for some reason?
-        static Collection::const_iterator find(const Collection& type, 
-            Symbol val) {
-
-            auto first = type.cbegin();
-            auto last = type.cend();
-            while (first != last) {
-                if (*first == val) return first;
-                ++first;
+                return _ruleSequences;
             }
-            return last;
-        }
+
+        private:
+            CharacterMap _characterMap;
+            RuleSequences _ruleSequences;
+        };
     };
 
     struct WyrdParser {
 
-        template <typename DataOutput = Tags,
-            typename Rules = WyrdSyntax::RuleList>
+        template <typename DataOutput = Tags>
             static DataOutput parse(std::string toParse, json syntax) {
 
-            Rules rules = WyrdSyntax::generateRules<Rules>(syntaxJson);
-            return parse<DataOutput, Rules>(toParse, rules);
-        }
-
-        template <typename DataOutput = Tags,
-            typename Rules = WyrdSyntax::RuleList>
-            static DataOutput parse(std::string toParse, Rules rules) {
-
-            CIter start = toParse.cbegin();
+            WyrdSyntax::RuleSet ruleSet(syntax);
+            CIter current = toParse.cbegin();
             CIter end = toParse.cend();
-            CIter current = start;
             DataOutput toReturnData;
+            WyrdSyntax::RuleResponse response;
 
-            bool outSuccess = false;
-            for (auto rule : rules) {
-                auto endOfSegment = rule(current, end, outSuccess);
-                if (!outSuccess) break; //stop early
-                else {
-                    toReturnData.push_back(
-                        DataOutput::value_type(current, endOfSegment));
+            for (auto ruleSequence : ruleSet.getRuleSequences()) {
+                for (auto rule : ruleSequence) {
+                    response = rule(current, end);
+                    if (!response.success) {
+                        return DataOutput();
+                    }
+                    else {
+                        toReturnData.push_back(DataOutput::value_type(current, 
+                            response.endingPosition));
+                        current = response.endingPosition;
+                    }
                 }
             }
 
-            return outSuccess ? toReturnData : DataOutput();
+            return toReturnData;
         }
     };
-
-            /*
-            //Initializations
-            std::string::const_iterator it = start;
-
-            //TODO: make this a static array
-            const Collection vowels = {
-                'a', 'e', 'i', 'o', 'u', 'y', 'q'
-            };
-            const Collection roots = {
-                'm', 'n', 'p', 'k', 't', 'l', 'h', 's', 'v', 'w', 'j'
-            };
-            const Collection tags = {
-                'x', 'f', 'c', 'z', 'b'
-            };
-            const Collection endOfSentence = {
-                '.', '!', '?', ':'
-            };
-            const Collection otherPunctuation = {
-                ',', '\'', '"'
-            };
-            const Collection expressionPrecursor = {
-                ';'
-            };
-
-
-            DataOutput data;
-            uint8_t c;
-            bool expectExpression = false;
-            bool expectPunctuation = true;
-            bool insideRoot = false;
-            while (it != end) {
-                c = *it++;
-                std::string element;
-
-                if (find(expressionPrecursor, c) != expressionPrecursor.cend()) {
-                    //Expression Prefix
-                    expectExpression = true;
-                    element += c;
-                    data.push_back(element);
-                }
-                else if (find(vowels, c) != vowels.cend()) {
-                    //Vowel = Expression or GrammarPrefix
-                    if (expectExpression) {
-                        element = c;
-                        //For each newly read in character...
-                        do {
-                            if (it == end) {
-                                break;
-                            }
-                            c = *it++;
-                            if (find(vowels, c) != vowels.cend()) {
-                                element += c;
-                            }
-                            else {
-                                //Otherwise, we are no longer in an expression
-                                expectExpression = false;
-                                //Ensure that the next pass doesn't skip
-                                --it;
-                            }
-                        } while (expectExpression);
-                        data.push_back(element);
-                    }
-                    else { //GrammarPrefix
-                        element += c;
-                        data.push_back(element);
-                    }
-                }
-                else if (find(roots, c) != roots.cend()) {
-                    element = c;
-                    for (int iRootSlot = 0; iRootSlot < ROOT_LENGTH - 1; ++iRootSlot) {
-                        if (it == end) {
-                            throw std::exception("item interrupted");
-                        }
-                        c = *it++;
-                        if (iRootSlot & 1) {
-                            if (find(roots, c) == roots.cend()) {
-                                throw std::exception("bad character");
-                            }
-                        }
-                        else {
-                            if (find(vowels, c) == vowels.cend()) {
-                                throw std::exception("bad character");
-                            }
-                        }
-                        element += c;
-                    }
-                    data.push_back(element);
-                }
-                else if (find(tags, c) != tags.cend()) {
-                    element = c;
-                    for (int iTagSlot = 0; iTagSlot < TAG_LENGTH - 1; ++iTagSlot) {
-                        if (it == end) {
-                            throw std::exception("item interrupted");
-                        }
-                        c = *it++;
-                        if (iTagSlot & 1) {
-                            if (find(vowels, c) == vowels.cend()) {
-                                throw std::exception("bad character");
-                            }
-                        }
-                        else {
-                            if (find(roots, c) == roots.cend()) {
-                                throw std::exception("bad character");
-                            }
-                        }
-                        element += *it++;
-                    }
-                    data.push_back(element);
-                }
-                else if (find(endOfSentence, c) != endOfSentence.cend()) {
-                    element = c;
-                    expectPunctuation = true;
-                    //For each newly read in character...
-                    do {
-                        if (it == end) {
-                            break;
-                        }
-                        c = *it++;
-                        if (find(endOfSentence, c) != endOfSentence.cend()) {
-                            element += c;
-                        }
-                        else {
-                            //Otherwise, we are no longer in an expression
-                            expectPunctuation = false;
-                            //Ensure that the next pass doesn't skip
-                            --it;
-                        }
-                    } while (expectPunctuation);
-                    data.push_back(element);
-                }
-                else if (find(otherPunctuation, c) != otherPunctuation.cend()) {
-                    element = c;
-                    data.push_back(element);
-                }
-            }
-
-            return data;
-            */
 
 }
 

@@ -39,9 +39,9 @@ int main()
 
     json syntax;
     syntaxFile >> syntax;
-    syntax = syntax["syntax"];
+    json syntaxObject = syntax["syntax"];
 
-    auto rules = wyrd::WyrdSyntax::generateRules(syntax);
+    auto rules = wyrd::WyrdSyntax::generateRules(syntaxObject);
     std::string line;
     std::getline(std::cin, line);
     while (line != "quit") {
