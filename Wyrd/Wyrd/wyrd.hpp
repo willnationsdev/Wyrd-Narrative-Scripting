@@ -55,7 +55,6 @@ namespace wyrd {
 
         typedef std::vector<std::string> Path;
         typedef std::string Characters;
-        typedef std::unordered_map<Path, Characters> CharacterMap;
         typedef unsigned char Condition;
 
         struct RuleResponse {
@@ -194,31 +193,47 @@ namespace wyrd {
             Condition _condition;
         };
 
-        typedef std::vector<Rule> RuleVector;
-        typedef std::vector<RuleVector> RuleSequences;
+        typedef std::vector<Rule> RuleSequence;
+        typedef std::vector<RuleSequence> RuleSequences;
+        typedef std::vector<std::string> CharacterSets;
+        typedef std::string TypeOrName;
+        typedef std::unordered_map<TypeOrName, CharacterSets> CharacterMap;
 
         class RuleSet {
         public:
+
+            /**
+             * RuleSet Custom Constructor
+             *
+             * Initializes the RuleSet from JSON syntax data.
+             *
+             * @param syntax The JSON data representing the syntax content.
+             * @return an initialized RuleSet object.
+             */
             RuleSet(json syntax) {
                 for (json characterSet : syntax["characterSets"]) {
-                    Path path = characterSet["name"];
+                    std::string name = characterSet["name"];
                     std::string characters = characterSet["characters"];
-                    _characterMap[path] = characters;
+                    _characterMap[name] = { characters };
+                    for (std::string type : characterSet["types"]) {
+                        _characterMap[type].push_back(characters);
+                    }
                 }
                 for (json ruleSequence : syntax["ruleSequences"]) {
-                    RuleVector rules;
+                    RuleSequence rules;
                     for (json rule : ruleSequence) {
-                        Path p = rule["characterSet"];
+                        TypeOrName tn = rule["characterSet"];
                         std::string s = rule["condition"];
                         Condition c = s[0];
-                        Characters ch = _characterMap.at(p);
-                        rules.push_back(Rule(ch, c));
+                        for (Characters ch : _characterMap.at(tn)) {
+                            rules.push_back(Rule(ch, c));
+                        }
                     }
                     _ruleSequences.push_back(rules);
                 }
             }
 
-            inline const std::vector<RuleVector>& getRuleSequences() 
+            inline const RuleSequences& getRuleSequences() 
                 const noexcept {
 
                 return _ruleSequences;
@@ -232,6 +247,17 @@ namespace wyrd {
 
     struct WyrdParser {
 
+        /**
+         * parse
+         *
+         * Parses a string based on the rules given from the syntax JSON data.
+         * Produces any object that can store string-like objects with a 
+         * push_back interface.
+         *
+         * @param toParse The string content to parse.
+         * @param syntax The JSON object informing how to parse the string.
+         * @return The DataOutput type resulting from the parse.
+         */
         template <typename DataOutput = Tags>
             static DataOutput parse(std::string toParse, json syntax) {
 
