@@ -55,10 +55,12 @@ namespace wyrd {
 
         typedef std::vector<std::string> Path;
         typedef std::string Characters;
-        typedef unsigned char Condition;
+        typedef std::vector<Characters> CharacterSets;
+        typedef unsigned char condition_t;
 
         struct RuleResponse {
-            RuleResponse(CIter ep, bool s) : endingPosition(ep), success(s) {}
+            RuleResponse(CIter ep = CIter(), bool s = false)
+                noexcept : endingPosition(ep), success(s) {}
             CIter endingPosition;
             bool success;
         };
@@ -73,10 +75,10 @@ namespace wyrd {
              * @param characterSet The string of characters this Rule will
              *                     expect to encounter.
              * @param condition The conditions in which this Rule will expect
-             *                  to encounter the characterSet characters.
+             *                  to encounter the characters.
              */
-            Rule(Characters characters, Condition condition)
-                : _characters(characters), _condition(condition) {}
+            Rule(CharacterSets characterSets, condition_t condition) noexcept
+                : _characterSets(characterSets), _condition(condition) {}
 
             /**
              * function call operator()
@@ -86,10 +88,8 @@ namespace wyrd {
              *
              * @param start The iterator marking our start position
              * @param end The iterator marking the end of the data.
-            *        invent a struct to return simply for this one function.
-             * @return An iterator to either the next location if we 
-             *         successfully "ate" any elements or an iterator to the 
-             *         start location if we failed to "eat" anything.
+             * @return A RuleResponse containing information regarding the
+             *         success/failure and new position for future reading.
              */
             RuleResponse operator()(CIter start, CIter end) {
 
@@ -100,64 +100,76 @@ namespace wyrd {
                 CIter current = start;
                 //If we were unable to locate the valid character list,
                 //then don't even bother continuing.
-                if (!_characters.size()) {
-                    return RuleResponse(start,false); 
+                if (!_characterSets.size()) {
+                    assert(0 && 
+                        "The character sets were not found in the JSON file.");
                 }
 
-                //Keep track of the original position, for minimum-length
-                //Rules.
-                auto original = current;
+                RuleResponse result(start, false);
 
-                //Evaluate the content differently based on what condition
-                //has been set for the rule.
-                switch (_condition) {
-                case '?':
-                    //Attempt to advance once.
-                    current += advance(_characters, current, end, 1);
-                    break;
-                case '*':
-                    //Attempt to advance as much as possible.
-                    current += advance(_characters, current, end);
-                    break;
-                case '+':
-                    //Attempt to advance as much as possible, but check
-                    //to make sure that we at least moved once.
-                    original = current;
-                    current += advance(_characters, current, end);
-                    if (original == current) {
-                        return RuleResponse(start,false);
-                    }
-                    break;
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    //Attempt to advance exactly "condition" times.
-                    current += 
-                        advance(_characters, current, end, _condition);
+                //Cycle through each of the character sets associated with
+                //this Rule. Construct a RuleResponse that represents the
+                //first one that actually works.
+                for (Characters characters : _characterSets) {
+                    //Keep track of the original position, for 
+                    //minimum-length Rules.
+                    auto original = current;
 
-                    //If advancement was not precise, then this string does
-                    //not conform to this rule.
-                    if (current != current + (_condition-'1'+1)) {
-                        return RuleResponse(start,false);
+                    //Evaluate the content differently based on what 
+                    //condition has been set for the rule.
+                    switch (_condition) {
+                    case '?':
+                        //Attempt to advance once.
+                        current += advance(characters, current, end, 1);
+                        break;
+                    case '*':
+                        //Attempt to advance as much as possible.
+                        current += advance(characters, current, end);
+                        break;
+                    case '+':
+                        //Attempt to advance as much as possible, but check
+                        //to make sure that we at least moved once.
+                        original = current;
+                        current += advance(characters, current, end);
+                        if (original == current) {
+                            continue;
+                        }
+                        break;
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        //Attempt to advance exactly "condition" times.
+                        current += 
+                            advance(characters, current, end, _condition);
+
+                        //If advancement was not precise, then this string does
+                        //not conform to this rule.
+                        if (current != current + (_condition-'1'+1)) {
+                            continue;
+                        }
+                        break;
+                    case '!':
+                        //If we DON'T want to find it, but we DO, report failure.
+                        if (characters.find(*current) != std::string::npos) {
+                            continue;
+                        }
+                    default:
+                        continue;
                     }
+                    result = RuleResponse(current, true);
                     break;
-                case '!':
-                    if (_characters.find(*current) != std::string::npos) {
-                        return RuleResponse(start, false);
-                    }
-                default:
-                    return RuleResponse(start, false);
                 }
+
 
                 //Notify the calling context of where we stopped, i.e. the
                 //start of the NEXT segment.
-                return RuleResponse(current,true);
+                return result;
             }
 
         private:
@@ -189,13 +201,22 @@ namespace wyrd {
                 return result;
             }
 
-            Characters _characters;
-            Condition _condition;
+            CharacterSets _characterSets;
+            condition_t _condition;
+        };
+
+        struct RuleSequence {
+            RuleSequence(const std::vector<Rule>& rules) : rules(rules) {}
+
+            RuleResponse operator()(CIter start, CIter end) {
+
+            }
+
+            std::vector<Rule> rules;
         };
 
         typedef std::vector<Rule> RuleSequence;
         typedef std::vector<RuleSequence> RuleSequences;
-        typedef std::vector<std::string> CharacterSets;
         typedef std::string TypeOrName;
         typedef std::unordered_map<TypeOrName, CharacterSets> CharacterMap;
 
@@ -222,18 +243,20 @@ namespace wyrd {
                 for (json ruleSequence : syntax["ruleSequences"]) {
                     RuleSequence rules;
                     for (json rule : ruleSequence) {
+                        //? These variables have to be constructed(?)
+                        //? because simply casting triggers assertions in 
+                        //? the json.hpp code.
                         TypeOrName tn = rule["characterSet"];
                         std::string s = rule["condition"];
-                        Condition c = s[0];
-                        for (Characters ch : _characterMap.at(tn)) {
-                            rules.push_back(Rule(ch, c));
-                        }
+                        condition_t c = s[0];
+                        CharacterSets cs = _characterMap.at(tn);
+                        rules.push_back(Rule(cs, c));
                     }
                     _ruleSequences.push_back(rules);
                 }
             }
 
-            inline const RuleSequences& getRuleSequences() 
+            const RuleSequences& getRuleSequences() 
                 const noexcept {
 
                 return _ruleSequences;
@@ -255,29 +278,45 @@ namespace wyrd {
          * push_back interface.
          *
          * @param toParse The string content to parse.
-         * @param syntax The JSON object informing how to parse the string.
+         * @param syntaxFileName The name of the file containing syntax JSON.
          * @return The DataOutput type resulting from the parse.
          */
         template <typename DataOutput = Tags>
-            static DataOutput parse(std::string toParse, json syntax) {
+        static DataOutput parse(std::string toParse, 
+            std::string syntaxFileName) {
 
-            WyrdSyntax::RuleSet ruleSet(syntax);
+            std::ifstream syntaxFile(syntaxFileName.c_str());
+
+            if (!syntaxFile.is_open()) {
+                assert(0 && "Could not open syntax file");
+            }
+
+            json syntax;
+            syntaxFile >> syntax;
+
+            WyrdSyntax::RuleSet ruleSet(syntax["syntax"]);
             CIter current = toParse.cbegin();
             CIter end = toParse.cend();
             DataOutput toReturnData;
-            WyrdSyntax::RuleResponse response;
 
             for (auto ruleSequence : ruleSet.getRuleSequences()) {
+                std::vector<WyrdSyntax::RuleResponse> responses;
                 for (auto rule : ruleSequence) {
-                    response = rule(current, end);
+                    auto response = rule(current, end);
                     if (!response.success) {
-                        return DataOutput();
+                        break;
                     }
                     else {
                         toReturnData.push_back(DataOutput::value_type(current, 
                             response.endingPosition));
                         current = response.endingPosition;
                     }
+                    responses.push_back(response);
+                }
+                for (auto iResponse = responses.crbegin();
+                    iResponse != responses.crend(); ++iResponse) {
+
+
                 }
             }
 

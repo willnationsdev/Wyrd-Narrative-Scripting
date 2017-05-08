@@ -3,8 +3,6 @@
  * Date Created: 02/27/2017
  */
 #include <iostream>
-#include <fstream>
-#include "json.hpp"
 #include "wyrd.hpp"
 
 using ParseData = std::vector<std::string>;
@@ -31,25 +29,18 @@ int main()
     }
     */
 
-    std::ifstream syntaxFile("syntax.json");
-
-    if (!syntaxFile.is_open()) {
-        assert(0 && "Could not open syntax file");
-    }
-
-    json syntax;
-    syntaxFile >> syntax;
-    json syntaxObject = syntax["syntax"];
-
     std::string line;
     std::getline(std::cin, line);
     while (line != "quit") {
 
+        std::cout << "Parsing...";
         wyrd::Tags tags = 
-            wyrd::WyrdParser::parse<>(line, syntaxObject);
+            wyrd::WyrdParser::parse<>(line, "syntax.json");
+        std::cout << tags.size() << " tags found:" << std::endl;
         for (size_t i = 0; i < tags.size(); ++i) {
             std::cout << i << ": " << tags[i] << std::endl;
         }
+        std::cout << "Awaiting new input..." << std::endl;
         std::getline(std::cin, line);
     }
 

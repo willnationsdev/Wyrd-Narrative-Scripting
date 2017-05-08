@@ -43,16 +43,21 @@
       }
     ],
     "ruleSequences": [
-      [
-        {
-          "characterSet": "prefixes",
-          "condition": "1"
-        },
-        {
-          "characterSet": "tags",
-          "condition": "+"
-        }
-      ],
+      {
+        "name": "prefix",
+        "rules": [
+          [
+            {
+              "characterSet": "prefixes",
+              "condition": "1"
+            },
+            {
+              "characterSet": "tags",
+              "condition": "+"
+            }
+          ]
+        ]
+      },
       [
         {
           "characterSet": "roots",
@@ -111,7 +116,7 @@
           "condition": "1"
         },
         {
-          "characterSet": "endPunctuationRecursive",
+          "characterSet": "endPunctuationMultiple",
           "condition": "!"
         },
         {
@@ -129,7 +134,7 @@
           "condition": "!"
         },
         {
-          "characterSet": "endPunctuationRecursive",
+          "characterSet": "endPunctuationMultiple",
           "condition": "!"
         }
       ]
