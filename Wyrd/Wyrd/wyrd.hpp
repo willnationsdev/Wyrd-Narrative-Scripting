@@ -58,11 +58,54 @@ namespace wyrd {
         typedef std::vector<Characters> CharacterSets;
         typedef unsigned char condition_t;
 
-        struct RuleResponse {
-            RuleResponse(CIter ep = CIter(), bool s = false)
+        struct ParseResponse {
+            ParseResponse(CIter ep = CIter(), bool s = false)
                 noexcept : endingPosition(ep), success(s) {}
             CIter endingPosition;
             bool success;
+        };
+
+        template <typename T>
+        class Condition {
+        public:
+            ParseResponse advance(CIter start, CIter end) {
+                return T.advance(start, end);
+            }
+
+            /**
+             * itrAdvanceChar
+             *
+             * Advances as far into the (start, end) string as it can, checking
+             * that characters are contained within characterList at each step.
+             * It will continue until it encounters a character NOT in the list
+             * or until it has encountered "occurrences" number of characters.
+             *
+             * @param characterList The list of characters to check against.
+             * @param start The starting string iterator.
+             * @param end The ending string iterator.
+             * @param occurrences The number of characters to read before 
+             *                    stopping.
+             * @return The number of characters that were read.
+             */
+            int itrAdvanceChar(const std::string& characterList, CIter start, 
+                const CIter& end, uint8_t occurrences = -1) {
+
+                CIter current = start;
+                int result = 0;
+                while (current != end && occurrences != 0 &&
+                    characterList.find(*current++) != std::string::npos) {
+                    result++;
+                    occurrences--;
+                }
+                return result;
+            }
+
+            int itrAdvanceRule(const std::string& ruleName, CIter start,
+                const CIter& end, uint8_t occurrences = -1) {
+
+                CIter current = start;
+                int result = 0;
+            }
         };
 
         struct Rule {
@@ -91,10 +134,10 @@ namespace wyrd {
              * @return A RuleResponse containing information regarding the
              *         success/failure and new position for future reading.
              */
-            RuleResponse operator()(CIter start, CIter end) {
+            ParseResponse operator()(CIter start, CIter end) {
 
                 if (start == end) {
-                    return RuleResponse(start,false);
+                    return ParseResponse(start,false);
                 }
 
                 CIter current = start;
@@ -105,7 +148,7 @@ namespace wyrd {
                         "The character sets were not found in the JSON file.");
                 }
 
-                RuleResponse result(start, false);
+                ParseResponse result(start, false);
 
                 //Cycle through each of the character sets associated with
                 //this Rule. Construct a RuleResponse that represents the
@@ -162,7 +205,7 @@ namespace wyrd {
                     default:
                         continue;
                     }
-                    result = RuleResponse(current, true);
+                    result = ParseResponse(current, true);
                     break;
                 }
 
@@ -205,22 +248,79 @@ namespace wyrd {
             condition_t _condition;
         };
 
-        struct RuleSequence {
-            RuleSequence(const std::vector<Rule>& rules) : rules(rules) {}
+        struct RuleRef {
+            RuleRef(std::string ruleName = "", condition_t condition = 0)
+                : _ruleName(ruleName), _condition(condition) {}
+            std::string _ruleName;
+            condition_t _condition;
+        };
 
-            RuleResponse operator()(CIter start, CIter end) {
+        struct RuleOrRef {
+            RuleOrRef() : ref() {
 
             }
+            RuleOrRef(const RuleOrRef& ror) {
+                if (ror.isRef && isRef) {
+                    ref = ror.ref;
+                }
+                else if (isRef) {
+                    rule = ror.rule;
+                }
+                //else do nothing
+            }
+            ~RuleOrRef() {
+                //? Warning, may have to use pointers for consistent size?
+            }
+            bool isRef = false;
+            union {
+                Rule rule;
+                RuleRef ref;
+            };
+        };
 
-            std::vector<Rule> rules;
+        typedef std::string RuleSetType;
+
+        class RuleSet {
+        public:
+            RuleSet(std::vector<RuleOrRef>&& rules)
+                : _rules(std::move(rules)) {}
+            RuleSet() : _rules() {}
+
+            ParseResponse operator()(CIter start, CIter end) {
+                ParseResponse result;
+                for (int i = 0; i < _rules.size(); ++i) {
+                    RuleOrRef ror = _rules[i];
+                    if (!ror.isRef) {
+                        ParseResponse current = ror.rule(start, end);
+                        
+                        //? Do I need to use int returns for these too?
+                        //? To keep the += functionality...?
+                        CIter a = result.endingPosition;
+                        a = a + current.endingPosition;
+                        result.endingPosition += current.endingPosition;
+                    }
+                }
+                for (Rule rule : _rules) {
+                    rule(start, end);
+                }
+            }
+
+            const std::vector<Rule>& getRules() { return _rules; }
+
+        private:
+            RuleSetType _type;
+            std::vector<RuleOrRef> _rules;
         };
 
         typedef std::vector<Rule> RuleSequence;
         typedef std::vector<RuleSequence> RuleSequences;
+        typedef std::string Type;
+        typedef std::string Name;
         typedef std::string TypeOrName;
-        typedef std::unordered_map<TypeOrName, CharacterSets> CharacterMap;
+        typedef std::unordered_map<Name, CharacterSets> CharacterMap;
+        typedef std::unordered_map<TypeOrName, RuleSet> RuleSetMap;
 
-        class RuleSet {
+        class RuleSetSyntax {
         public:
 
             /**
@@ -231,7 +331,7 @@ namespace wyrd {
              * @param syntax The JSON data representing the syntax content.
              * @return an initialized RuleSet object.
              */
-            RuleSet(json syntax) {
+            RuleSetSyntax(json syntax) {
                 for (json characterSet : syntax["characterSets"]) {
                     std::string name = characterSet["name"];
                     std::string characters = characterSet["characters"];
@@ -241,18 +341,18 @@ namespace wyrd {
                     }
                 }
                 for (json ruleSequence : syntax["ruleSequences"]) {
-                    RuleSequence rules;
+                    RuleSequence currentRules;
                     for (json rule : ruleSequence) {
                         //? These variables have to be constructed(?)
                         //? because simply casting triggers assertions in 
                         //? the json.hpp code.
-                        TypeOrName tn = rule["characterSet"];
+                        Name tn = rule["characterSet"];
                         std::string s = rule["condition"];
                         condition_t c = s[0];
                         CharacterSets cs = _characterMap.at(tn);
-                        rules.push_back(Rule(cs, c));
+                        currentRules.rules.push_back({ Rule(cs, c) });
                     }
-                    _ruleSequences.push_back(rules);
+                    _ruleSequences.push_back(currentRules);
                 }
             }
 
@@ -264,7 +364,7 @@ namespace wyrd {
 
         private:
             CharacterMap _characterMap;
-            RuleSequences _ruleSequences;
+            RuleSequencesMap _ruleSequencesMap;
         };
     };
 
