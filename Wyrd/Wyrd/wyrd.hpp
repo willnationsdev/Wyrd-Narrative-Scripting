@@ -17,6 +17,47 @@ using nlohmann::json;
 
 namespace wyrd {
 
+    /*
+    enum class PartOfSpeech {
+        LEFT_ENTITY = 'u', 
+        RELATION = 'a', 
+        RIGHT_ENTITY = 'e', 
+        MODIFIER = 'i', 
+        VOCATIVE = 'o'
+    };
+
+    template <typename T>
+    class IContentNode {
+    public:
+        std::string getContent() { return T.getContent(); }
+        void setContent(const std::string& s) { T.setContent(s); }
+        void setContent(std::string&& s) { T.setContent(s); }
+        std::vector<IContentNode*> getChildren() { return T.getChildren(); }
+    };
+
+    class WyrdNode : public IContentNode<WyrdNode> {
+    public:
+        WyrdNode(const std::string& content = "", WyrdNode* parent = nullptr)
+            : _content(content), _parent(parent) {}
+        std::string getContent() { return _content; }
+        void setContent(const std::string& s) { _content = s; }
+        void setContent(std::string&& s) { _content = s; }
+        std::vector<WyrdNode*> getChildren() { return _children; }
+        const WyrdNode* getParent() { return _parent; }
+    private:
+        std::string _content;
+        std::vector<WyrdNode*> _children;
+        const WyrdNode* _parent;
+    };
+
+    class WyrdTree {
+    public:
+        WyrdNode* getTop() { return _top; }
+
+    private:
+        WyrdNode* _top;
+    };*/
+
     typedef std::string::const_iterator CIter;
     typedef std::vector<std::string> Tags;
 
@@ -59,13 +100,13 @@ namespace wyrd {
         typedef unsigned char condition_t;
 
         struct ParseResponse {
-            ParseResponse(CIter ep = CIter(), bool s = false)
-                noexcept : endingPosition(ep), success(s) {}
-            CIter endingPosition;
-            bool success;
+            ParseResponse(unsigned int deltaPosition = 0, bool success = false)
+                noexcept : _deltaPosition(deltaPosition), _success(success) {}
+            unsigned int _deltaPosition;
+            bool _success;
         };
 
-        template <typename T>
+        /*template <typename T>
         class Condition {
         public:
             ParseResponse advance(CIter start, CIter end) {
@@ -87,7 +128,7 @@ namespace wyrd {
              *                    stopping.
              * @return The number of characters that were read.
              */
-            int itrAdvanceChar(const std::string& characterList, CIter start, 
+            /*int itrAdvanceChar(const std::string& characterList, CIter start, 
                 const CIter& end, uint8_t occurrences = -1) {
 
                 CIter current = start;
@@ -106,9 +147,10 @@ namespace wyrd {
                 CIter current = start;
                 int result = 0;
             }
-        };
+        };*/
 
-        struct Rule {
+        class Rule {
+        public:
 
             /**
              * Custom Constructor
@@ -120,8 +162,9 @@ namespace wyrd {
              * @param condition The conditions in which this Rule will expect
              *                  to encounter the characters.
              */
-            Rule(CharacterSets characterSets, condition_t condition) noexcept
-                : _characterSets(characterSets), _condition(condition) {}
+            Rule(std::string characters = "", condition_t condition = '1') 
+                noexcept 
+                : _characters(characters), _condition(condition) {}
 
             /**
              * function call operator()
@@ -136,79 +179,72 @@ namespace wyrd {
              */
             ParseResponse operator()(CIter start, CIter end) {
 
+                //If we have nothing to parse, then there's no reason to say
+                //we AREN'T looking at this language's syntax. For all we know,
+                //it could be.
                 if (start == end) {
-                    return ParseResponse(start,false);
+                    return ParseResponse(0,true);
                 }
 
-                CIter current = start;
+                unsigned int delta = 0;
                 //If we were unable to locate the valid character list,
                 //then don't even bother continuing.
-                if (!_characterSets.size()) {
+                if (!_characters.length()) {
                     assert(0 && 
                         "The character sets were not found in the JSON file.");
                 }
 
-                ParseResponse result(start, false);
+                ParseResponse result(0, false);
 
-                //Cycle through each of the character sets associated with
-                //this Rule. Construct a RuleResponse that represents the
-                //first one that actually works.
-                for (Characters characters : _characterSets) {
-                    //Keep track of the original position, for 
-                    //minimum-length Rules.
-                    auto original = current;
-
-                    //Evaluate the content differently based on what 
-                    //condition has been set for the rule.
-                    switch (_condition) {
-                    case '?':
-                        //Attempt to advance once.
-                        current += advance(characters, current, end, 1);
-                        break;
-                    case '*':
-                        //Attempt to advance as much as possible.
-                        current += advance(characters, current, end);
-                        break;
-                    case '+':
-                        //Attempt to advance as much as possible, but check
-                        //to make sure that we at least moved once.
-                        original = current;
-                        current += advance(characters, current, end);
-                        if (original == current) {
-                            continue;
-                        }
-                        break;
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        //Attempt to advance exactly "condition" times.
-                        current += 
-                            advance(characters, current, end, _condition);
-
-                        //If advancement was not precise, then this string does
-                        //not conform to this rule.
-                        if (current != current + (_condition-'1'+1)) {
-                            continue;
-                        }
-                        break;
-                    case '!':
-                        //If we DON'T want to find it, but we DO, report failure.
-                        if (characters.find(*current) != std::string::npos) {
-                            continue;
-                        }
-                    default:
-                        continue;
-                    }
-                    result = ParseResponse(current, true);
+                //Evaluate the content differently based on what 
+                //condition has been set for the rule.
+                switch (_condition) {
+                case '?':
+                    //Attempt to advance once.
+                    delta = advance(_characters, start+delta, end, 1);
                     break;
-                }
+                case '*':
+                    //Attempt to advance as much as possible.
+                    delta = advance(_characters, start+delta, end);
+                    break;
+                case '+':
+                    //Attempt to advance as much as possible, but check
+                    //to make sure that we at least moved once.
+                    delta = advance(_characters, start+delta, end);
+                    if (delta <= 0) {
+                        return ParseResponse(0, false);
+                    }
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    //Attempt to advance exactly "condition" times.
+                    delta = 
+                        advance(_characters, start+delta, end, _condition);
 
+                    //If advancement was not precise, then this string does
+                    //not conform to this rule.
+                    if (delta != _condition) {
+                        return ParseResponse(0, false);
+                    }
+                    break;
+                case '!':
+                    //If we DON'T want to find it, but we DO, report failure.
+                    if (_characters.find(*(start+delta)) != 
+                        std::string::npos) {
+
+                        return ParseResponse(0, false);
+                    }
+                default:
+                    return ParseResponse(0, false);
+                }
+                result = ParseResponse(delta, true);
 
                 //Notify the calling context of where we stopped, i.e. the
                 //start of the NEXT segment.
@@ -244,37 +280,95 @@ namespace wyrd {
                 return result;
             }
 
-            CharacterSets _characterSets;
+            std::string _characters;
             condition_t _condition;
         };
 
-        struct RuleRef {
-            RuleRef(std::string ruleName = "", condition_t condition = 0)
-                : _ruleName(ruleName), _condition(condition) {}
+        class RuleSetMap;
+
+        /**
+         * RuleRef
+         *
+         * A class that allows one to reference an existing rule for a RuleSet.
+         */
+        class RuleRef {
+        public:
+            RuleRef(std::string ruleName = "", condition_t condition = 0,
+                const RuleSetMap* rules = nullptr)
+                : _ruleName(ruleName), _condition(condition), _rules(rules) {}
+
+            /**
+             * call operator
+             * 
+             * Searches through the RuleSetMap for the RuleSet with its
+             * _ruleName and calls the call operator on each rule in that
+             * RuleSet. Must also take into account the "type" of the RuleSet
+             * so that logic is applied to the relationships between the rules.
+             */
+            ParseResponse operator()(CIter start, CIter end) {
+                //TODO: Implement searching functionality.
+                //TODO: Will need to add a pointer to the RuleSetMap to each
+                //TODO: RuleRef. Would be better in the future if there were
+                //TODO: group IDs associated with RuleRefs so you could
+                //TODO: potentially have multiple RuleSetMaps, though I'm not
+                //TODO: sure if that would ever actually be needed...
+
+
+
+                return ParseResponse();
+            }
+
+        private:
+            const RuleSetMap* _rules;
             std::string _ruleName;
             condition_t _condition;
         };
 
-        struct RuleOrRef {
-            RuleOrRef() : ref() {
+        class RuleOrRef {
+        public:
+            RuleOrRef() : _rule() {
 
             }
+            RuleOrRef(const Rule& rule) : _isRef(false), _rule(rule) {}
+            RuleOrRef(const RuleRef& ref) : _isRef(true), _ref(ref) {}
             RuleOrRef(const RuleOrRef& ror) {
-                if (ror.isRef && isRef) {
-                    ref = ror.ref;
+                if (ror.getIsRef()) {
+                    _isRef = true;
+                    _ref = ror.getRef();
                 }
-                else if (isRef) {
-                    rule = ror.rule;
+                else {
+                    _isRef = false;
+                    _rule = ror.getRule();
                 }
-                //else do nothing
+            }
+            const RuleOrRef& operator=(const RuleOrRef& ror) {
+                if (ror.getIsRef()) {
+                    _isRef = true;
+                    _ref = ror.getRef();
+                }
+                else {
+                    _isRef = false;
+                    _rule = ror.getRule();
+                }
+                return *this;
             }
             ~RuleOrRef() {
                 //? Warning, may have to use pointers for consistent size?
+                //? Need to look into the needs of destructors for unions...
             }
-            bool isRef = false;
+
+            bool getIsRef() const noexcept { return _isRef; }
+            Rule getRule() const noexcept { return !_isRef ? _rule : Rule(); }
+            RuleRef getRef() const noexcept 
+                { return _isRef ? _ref : RuleRef(); }
+            ParseResponse operator()(CIter start, CIter end) {
+                return _isRef ? _ref(start, end) : _rule(start, end);
+            }
+        private:
+            bool _isRef = false;
             union {
-                Rule rule;
-                RuleRef ref;
+                Rule _rule;
+                RuleRef _ref;
             };
         };
 
@@ -282,43 +376,34 @@ namespace wyrd {
 
         class RuleSet {
         public:
-            RuleSet(std::vector<RuleOrRef>&& rules)
-                : _rules(std::move(rules)) {}
+            RuleSet(std::vector<RuleOrRef>&& rules, std::string type = 
+                "sequence")
+                : _rules(std::move(rules)), _type(type) {}
             RuleSet() : _rules() {}
 
             ParseResponse operator()(CIter start, CIter end) {
                 ParseResponse result;
-                for (int i = 0; i < _rules.size(); ++i) {
+                for (size_t i = 0; i < _rules.size(); ++i) {
                     RuleOrRef ror = _rules[i];
-                    if (!ror.isRef) {
-                        ParseResponse current = ror.rule(start, end);
+                    if (!ror.getIsRef()) {
+                        ParseResponse current = ror(start, end);
                         
                         //? Do I need to use int returns for these too?
                         //? To keep the += functionality...?
-                        CIter a = result.endingPosition;
-                        a = a + current.endingPosition;
-                        result.endingPosition += current.endingPosition;
+                        result._deltaPosition += current._deltaPosition;
                     }
                 }
-                for (Rule rule : _rules) {
-                    rule(start, end);
+                for (RuleOrRef ror: _rules) {
+                    ror(start, end);
                 }
             }
 
-            const std::vector<Rule>& getRules() { return _rules; }
+            std::vector<RuleOrRef>& getRules() { return _rules; }
 
         private:
             RuleSetType _type;
             std::vector<RuleOrRef> _rules;
         };
-
-        typedef std::vector<Rule> RuleSequence;
-        typedef std::vector<RuleSequence> RuleSequences;
-        typedef std::string Type;
-        typedef std::string Name;
-        typedef std::string TypeOrName;
-        typedef std::unordered_map<Name, CharacterSets> CharacterMap;
-        typedef std::unordered_map<TypeOrName, RuleSet> RuleSetMap;
 
         class RuleSetSyntax {
         public:
@@ -335,36 +420,50 @@ namespace wyrd {
                 for (json characterSet : syntax["characterSets"]) {
                     std::string name = characterSet["name"];
                     std::string characters = characterSet["characters"];
-                    _characterMap[name] = { characters };
-                    for (std::string type : characterSet["types"]) {
-                        _characterMap[type].push_back(characters);
-                    }
+                    _characterMap[name] = characters;
                 }
-                for (json ruleSequence : syntax["ruleSequences"]) {
-                    RuleSequence currentRules;
-                    for (json rule : ruleSequence) {
-                        //? These variables have to be constructed(?)
-                        //? because simply casting triggers assertions in 
-                        //? the json.hpp code.
-                        Name tn = rule["characterSet"];
+                for (json ruleSet : syntax["ruleSets"]) {
+                    std::string ruleSetName = ruleSet["name"];
+                    RuleSet currentRules;
+                    for (json rule : ruleSet["set"]) {
+                        //? This complicated set of temporaries appears
+                        //? necessary since json.hpp seems to not allow
+                        //? static casting of return values. I'll get compiler
+                        //? errors or a runtime assert when I try simpler
+                        //? one-liner methods. Would prefer to get rid of them.
                         std::string s = rule["condition"];
                         condition_t c = s[0];
-                        CharacterSets cs = _characterMap.at(tn);
-                        currentRules.rules.push_back({ Rule(cs, c) });
+                        std::string name;
+                        if (rule.find("characterSet") != rule.end()) {
+                            std::string tempName = rule["characterSet"];
+                            name = tempName;
+                        }
+                        else if (rule.find("rule") != rule.end()) {
+                            std::string tempName = rule["rule"];
+                            name = tempName;
+                        }
+                        else {
+                            assert(0 && "Failed to get rule from json");
+                        }
+                        std::string cs = _characterMap.at(name);
+                        currentRules.getRules()
+                                    .push_back({ RuleOrRef(Rule(cs, c)) });
                     }
-                    _ruleSequences.push_back(currentRules);
+                    _ruleSetMap[ruleSetName] = currentRules;
                 }
             }
 
-            const RuleSequences& getRuleSequences() 
+            const std::unordered_map<std::string, RuleSet>& getRuleSetMap()
                 const noexcept {
 
-                return _ruleSequences;
+                return _ruleSetMap;
             }
 
+            friend RuleRef;
+
         private:
-            CharacterMap _characterMap;
-            RuleSequencesMap _ruleSequencesMap;
+            std::unordered_map<std::string, std::string> _characterMap;
+            std::unordered_map<std::string, RuleSet> _ruleSetMap;
         };
     };
 
@@ -394,22 +493,23 @@ namespace wyrd {
             json syntax;
             syntaxFile >> syntax;
 
-            WyrdSyntax::RuleSet ruleSet(syntax["syntax"]);
-            CIter current = toParse.cbegin();
+            WyrdSyntax::RuleSetSyntax syntaxRules(syntax["syntax"]);
+            CIter start = toParse.cbegin();
+            CIter current = start;
             CIter end = toParse.cend();
             DataOutput toReturnData;
 
-            for (auto ruleSequence : ruleSet.getRuleSequences()) {
-                std::vector<WyrdSyntax::RuleResponse> responses;
-                for (auto rule : ruleSequence) {
+            for (auto ruleSet : syntaxRules.getRuleSetMap()) {
+                std::vector<WyrdSyntax::ParseResponse> responses;
+                for (auto rule : ruleSet.second.getRules()) {
                     auto response = rule(current, end);
-                    if (!response.success) {
+                    if (!response._success) {
                         break;
                     }
                     else {
                         toReturnData.push_back(DataOutput::value_type(current, 
-                            response.endingPosition));
-                        current = response.endingPosition;
+                            start+response._deltaPosition));
+                        current = start + response._deltaPosition;
                     }
                     responses.push_back(response);
                 }

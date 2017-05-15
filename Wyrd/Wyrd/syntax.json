@@ -37,6 +37,7 @@
     "ruleSets": [
       {
         "name": "prefixes",
+        "id": 1,
         "type": "sequence",
         "set": [
           {
@@ -51,6 +52,7 @@
       },
       {
         "name": "roots",
+        "id": 2,
         "type": "sequence",
         "set": [
           {
@@ -73,6 +75,7 @@
       },
       {
         "name": "particles",
+        "id": 3,
         "type": "sequence",
         "set": [
           {
@@ -87,6 +90,7 @@
       },
       {
         "name": "tags",
+        "id": 4,
         "type": "any",
         "set": [
           {
@@ -101,6 +105,7 @@
       },
       {
         "name": "expressions",
+        "id": 5,
         "type": "sequence",
         "set": [
           {
@@ -115,6 +120,7 @@
       },
       {
         "name": "endPunctuationMultiple",
+        "id": 6,
         "type": "sequence",
         "set": [
           {
@@ -133,6 +139,7 @@
       },
       {
         "name": "endPunctuation",
+        "id": 7,
         "type": "sequence",
         "set": [
           {
@@ -151,6 +158,7 @@
       },
       {
         "name": "midPunctuation",
+        "id": 8,
         "type": "sequence",
         "set": [
           {
