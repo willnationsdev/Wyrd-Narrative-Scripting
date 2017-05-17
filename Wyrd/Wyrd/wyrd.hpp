@@ -99,21 +99,94 @@ struct WyrdSyntax {
     typedef std::vector<Characters> CharacterSets;
     typedef unsigned char condition_t;
 
+    /**
+     * ParseResponse
+     * 
+     * A linked-list of results associated with a Rule or RuleRef (RuleOrRef)
+     * Rules by definition should return a list with one item.
+     * RuleRefs should return a list with one item for each reference. In this
+     * way, each reference individually reports its success rate / progress
+     * while a set of nested references as a whole can be identified at the
+     * top level by whether they have an empty _next or not.
+     */
     struct ParseResponse {
-        ParseResponse(unsigned int deltaPosition = 0, bool success = false)
-            noexcept : _deltaPosition(deltaPosition), _success(success) {}
-        unsigned int _deltaPosition;
-        bool _success;
-        const ParseResponse& synchSequence(const ParseResponse& other) {
-            _deltaPosition += other._deltaPosition;
-            _success &= other._success;
-            return *this;
+        /**
+         * Custom Default Constructor
+         * 
+         * Initializes a ParseResponse list.
+         * 
+         * @param deltaPosition The position this response should assume to be.
+         * @param success The initial success state of this response.
+         * @param next Any subsequent responses matched to this one.
+         * @return An initialized ParseResponse object.
+         */
+        ParseResponse(unsigned int deltaPosition = 0, bool success = false,
+            ParseResponse* next = nullptr) noexcept 
+            : deltaPosition(deltaPosition), success(success), next(next) {}
+
+        /**
+         * Copy Constructor
+         *
+         * @param other The ParseResponse to copy.
+         * @return An initialized ParseResponse object.
+         */
+        ParseResponse(const ParseResponse& other)
+            : deltaPosition(other.deltaPosition), success(other.success),
+            next(other.next) {
         }
-        const ParseResponse& synchAny(const ParseResponse& other) {
-            _deltaPosition += other._deltaPosition;
-            _success |= other._success;
-            return *this;
+
+        /**
+         * Move Constructor
+         * 
+         * @param other The ParseResponse to move data from.
+         * @return An initialized ParseResponse object.
+         */
+        ParseResponse(ParseResponse&& other) 
+            : deltaPosition(other.deltaPosition), success(other.success),
+            next(std::move(other.next)) {
         }
+
+        /**
+         * Copy Assignment
+         *
+         * @param other The ParseResponse to copy.
+         * @return The overwritten ParseResponse object.
+         */
+        ParseResponse& operator=(const ParseResponse& other) {
+            if (this == &other) return *this;
+            deltaPosition = other.deltaPosition;
+            success = other.success;
+            next = other.next;
+        }
+
+        /**
+         * Move Assignment
+         *
+         * @param other The ParseResponse to move data from.
+         * @return The overwritten ParseResponse object.
+         */
+        ParseResponse& operator=(ParseResponse&& other) {
+            if (this == &other) return *this;
+            deltaPosition = other.deltaPosition;
+            success = other.success;
+            next = std::move(other.next);
+        }
+
+        /**
+         * Destructor
+         */
+        ~ParseResponse() {
+            if (next) {
+                delete next;
+            }
+        }
+
+        // The amount the parsing process advanced during rule confirmation.
+        unsigned int deltaPosition;
+        // Whether the rule was confirmed successfully.
+        bool success;
+        // A link to any nested responses
+        ParseResponse* next;
     };
 
     /*template <typename T>
@@ -317,12 +390,6 @@ struct WyrdSyntax {
          * so that logic is applied to the relationships between the rules.
          */
         std::vector<ParseResponse>&& operator()(CIter start, CIter end) {
-            //TODO: Implement searching functionality.
-            //TODO: Will need to add a pointer to the RuleSetMap to each
-            //TODO: RuleRef. Would be better in the future if there were
-            //TODO: group IDs associated with RuleRefs so you could
-            //TODO: potentially have multiple RuleSetMaps, though I'm not
-            //TODO: sure if that would ever actually be needed...
 
             std::vector<ParseResponse> result;
             RuleSet currentRuleSet = _rules->at(_ruleName);
@@ -394,26 +461,52 @@ struct WyrdSyntax {
 
     class RuleSet {
     public:
-        RuleSet(std::vector<RuleOrRef>&& rules, std::string type = 
+        /**
+         * Custom Default Constructor
+         *
+         * RuleSets can be initialized with a set of rules and/or with
+         * a RuleSet "type" indicating the manner in which it relates
+         * the various responses from the rules and rule-references
+         * associated with it.
+         *
+         * @param rules A beginning list of rules, if needed.
+         * @param type A string flagging how rules are to be interpreted.
+         * @return An initialized RuleSet object.
+         */
+        RuleSet(std::vector<RuleOrRef>&& rules = {}, std::string type =
             "sequence")
             : _rules(std::move(rules)), _type(type) {}
-        RuleSet() : _rules() {}
 
+        /**
+         * Call Operator
+         *
+         * Aggregates the ParseResponses of Rules and RuleRefs managed
+         * by the RuleSet given a string's start and end positions.
+         *
+         * @param start The string iterator noting from where to start reading.
+         * @param end The string iterator noting the last possible read 
+         *            position.
+         * @return The final ParseResponse summarizing the results of whichever
+         *         single set of rules correspond to the given string.
+         */
         ParseResponse operator()(CIter start, CIter end) {
 
             for (RuleOrRef ror : _rules) {
                 std::vector<ParseResponse> responses = ror(start, end);
 
-                ParseResponse pr;
+                ParseResponse response;
                 if (_type == "sequence") {
-                    pr = aggregateSequence(responses);
+                    response = aggregateSequence(responses);
                 }
                 else if (_type == "any") {
-                    pr = aggregateAny(responses);
+                    response = aggregateAny(responses);
+                }
+                else {
+                    assert(0 && "Unknown rule set type from JSON");
                 }
 
-                if (pr._success) {
-                    return pr;
+                if (response.success) {
+                    return response;
                 }
             }
         }
@@ -429,8 +522,8 @@ struct WyrdSyntax {
 
             ParseResponse pr(0, true);
             for (ParseResponse current : responses) {
-                pr._deltaPosition += current._deltaPosition;
-                pr._success &= current._success;
+                pr.deltaPosition += current.deltaPosition;
+                pr.success &= current.success;
             }
             return std::move(pr);
         }
@@ -440,8 +533,8 @@ struct WyrdSyntax {
 
             ParseResponse pr(0, false);
             for (ParseResponse current : responses) {
-                pr._deltaPosition += current._deltaPosition;
-                pr._success |= current._success;
+                pr.deltaPosition += current.deltaPosition;
+                pr.success |= current.success;
             }
             return std::move(pr);
         }
