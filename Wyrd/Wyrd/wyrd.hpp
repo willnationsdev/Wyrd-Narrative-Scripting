@@ -19,10 +19,10 @@ namespace wyrd {
 
 /*
 enum class PartOfSpeech {
-    LEFT_ENTITY = 'u', 
-    RELATION = 'a', 
-    RIGHT_ENTITY = 'e', 
-    MODIFIER = 'i', 
+    LEFT_ENTITY = 'u',
+    RELATION = 'a',
+    RIGHT_ENTITY = 'e',
+    MODIFIER = 'i',
     VOCATIVE = 'o'
 };
 
@@ -66,9 +66,9 @@ struct JsonUtility {
     /**
      * findWhere
      *
-     * Searches through an array-based JSON object "data" contains an 
+     * Searches through an array-based JSON object "data" contains an
      * object with key "key" equal to value "val".
-     * 
+     *
      * @param data The JSON object to search through. Must be an array of
      *             objects.
      * @param key The string key name to check against in each object.
@@ -101,92 +101,41 @@ struct WyrdSyntax {
 
     /**
      * ParseResponse
-     * 
+     *
      * A linked-list of results associated with a Rule or RuleRef (RuleOrRef)
      * Rules by definition should return a list with one item.
      * RuleRefs should return a list with one item for each reference. In this
      * way, each reference individually reports its success rate / progress
      * while a set of nested references as a whole can be identified at the
      * top level by whether they have an empty _next or not.
+     *
+     * Note: If there ever comes a time when ParseResponses actually need more
+     *       distinction beyond ref- and non-ref-generated, then we can shift
+     *       to a type based method. For now, I'd prefer to avoid dynamic
+     *       casting and/or virtual pointers.
      */
     struct ParseResponse {
         /**
          * Custom Default Constructor
-         * 
-         * Initializes a ParseResponse list.
-         * 
+         *
+         * Initializes a ParseResponse.
+         *
          * @param deltaPosition The position this response should assume to be.
          * @param success The initial success state of this response.
-         * @param next Any subsequent responses matched to this one.
+         * @param isFromRef Whether this response is built from a reference.
          * @return An initialized ParseResponse object.
          */
-        ParseResponse(unsigned int deltaPosition = 0, bool success = false,
-            ParseResponse* next = nullptr) noexcept 
-            : deltaPosition(deltaPosition), success(success), next(next) {}
-
-        /**
-         * Copy Constructor
-         *
-         * @param other The ParseResponse to copy.
-         * @return An initialized ParseResponse object.
-         */
-        ParseResponse(const ParseResponse& other)
-            : deltaPosition(other.deltaPosition), success(other.success),
-            next(other.next) {
-        }
-
-        /**
-         * Move Constructor
-         * 
-         * @param other The ParseResponse to move data from.
-         * @return An initialized ParseResponse object.
-         */
-        ParseResponse(ParseResponse&& other) 
-            : deltaPosition(other.deltaPosition), success(other.success),
-            next(std::move(other.next)) {
-        }
-
-        /**
-         * Copy Assignment
-         *
-         * @param other The ParseResponse to copy.
-         * @return The overwritten ParseResponse object.
-         */
-        ParseResponse& operator=(const ParseResponse& other) {
-            if (this == &other) return *this;
-            deltaPosition = other.deltaPosition;
-            success = other.success;
-            next = other.next;
-        }
-
-        /**
-         * Move Assignment
-         *
-         * @param other The ParseResponse to move data from.
-         * @return The overwritten ParseResponse object.
-         */
-        ParseResponse& operator=(ParseResponse&& other) {
-            if (this == &other) return *this;
-            deltaPosition = other.deltaPosition;
-            success = other.success;
-            next = std::move(other.next);
-        }
-
-        /**
-         * Destructor
-         */
-        ~ParseResponse() {
-            if (next) {
-                delete next;
-            }
-        }
+        ParseResponse(unsigned int deltaPosition = 0,
+            bool isSuccessful = false, bool isFromRef = false) noexcept
+            : deltaPosition(deltaPosition), isSuccessful(isSuccessful),
+            isFromRef(isFromRef) {}
 
         // The amount the parsing process advanced during rule confirmation.
         unsigned int deltaPosition;
         // Whether the rule was confirmed successfully.
-        bool success;
-        // A link to any nested responses
-        ParseResponse* next;
+        bool isSuccessful : 1;
+        // Whether the response was generated from a rule reference.
+        bool isFromRef : 1;
     };
 
     /*template <typename T>
@@ -237,21 +186,21 @@ struct WyrdSyntax {
 
         /**
          * Custom Constructor
-         * 
+         *
          * Initializes variables that the Rule will need.
-         * 
+         *
          * @param characterSet The string of characters this Rule will
          *                     expect to encounter.
          * @param condition The conditions in which this Rule will expect
          *                  to encounter the characters.
          */
-        Rule(std::string characters = "", condition_t condition = '1') 
-            noexcept 
+        Rule(std::string characters = "", condition_t condition = '1')
+            noexcept
             : _characters(characters), _condition(condition) {}
 
         /**
          * function call operator()
-         * 
+         *
          * Checks whether the string starting at start has characters in
          * _characterSet in the sequence described by _condition.
          *
@@ -269,17 +218,20 @@ struct WyrdSyntax {
                 return { ParseResponse(0,true) };
             }
 
-            unsigned int delta = 0;
             //If we were unable to locate the valid character list,
             //then don't even bother continuing.
             if (!_characters.length()) {
-                assert(0 && 
+                assert(0 &&
                     "The character sets were not found in the JSON file.");
             }
 
-            ParseResponse result(0, false);
+            //The amount we have advanced in the current parse.
+            unsigned int delta = 0;
 
-            //Evaluate the content differently based on what 
+            //The full response of our parse that we will return at the end.
+            ParseResponse result;
+
+            //Evaluate the content differently based on what
             //condition has been set for the rule.
             switch (_condition) {
             case '?':
@@ -308,7 +260,7 @@ struct WyrdSyntax {
             case '8':
             case '9':
                 //Attempt to advance exactly "condition" times.
-                delta = 
+                delta =
                     advance(_characters, start+delta, end, _condition);
 
                 //If advancement was not precise, then this string does
@@ -319,7 +271,7 @@ struct WyrdSyntax {
                 break;
             case '!':
                 //If we DON'T want to find it, but we DO, report failure.
-                if (_characters.find(*(start+delta)) != 
+                if (_characters.find(*(start+delta)) !=
                     std::string::npos) {
 
                     return { ParseResponse(0, false) };
@@ -346,11 +298,11 @@ struct WyrdSyntax {
          * @param characterList The list of characters to check against.
          * @param start The starting string iterator.
          * @param end The ending string iterator.
-         * @param occurrences The number of characters to read before 
+         * @param occurrences The number of characters to read before
          *                    stopping.
          * @return The number of characters that were read.
          */
-        int advance(const std::string& characterList, CIter start, 
+        int advance(const std::string& characterList, CIter start,
             const CIter& end, uint8_t occurrences = -1) {
 
             CIter current = start;
@@ -383,7 +335,7 @@ struct WyrdSyntax {
 
         /**
          * call operator
-         * 
+         *
          * Searches through the RuleSetMap for the RuleSet with its
          * _ruleName and calls the call operator on each rule in that
          * RuleSet. Must also take into account the "type" of the RuleSet
@@ -413,9 +365,9 @@ struct WyrdSyntax {
         RuleOrRef() : _rule() {
 
         }
-        RuleOrRef(const Rule& rule) : _isRef(false), _rule(rule) {}
-        RuleOrRef(const RuleRef& ref) : _isRef(true), _ref(ref) {}
-        RuleOrRef(const RuleOrRef& ror) {
+        RuleOrRef(const Rule& rule) noexcept : _isRef(false), _rule(rule) {}
+        RuleOrRef(const RuleRef& ref) noexcept : _isRef(true), _ref(ref) {}
+        RuleOrRef(const RuleOrRef& ror) noexcept {
             if (ror.getIsRef()) {
                 _isRef = true;
                 _ref = ror.getRef();
@@ -425,7 +377,7 @@ struct WyrdSyntax {
                 _rule = ror.getRule();
             }
         }
-        const RuleOrRef& operator=(const RuleOrRef& ror) {
+        RuleOrRef& operator=(const RuleOrRef& ror) noexcept {
             if (ror.getIsRef()) {
                 _isRef = true;
                 _ref = ror.getRef();
@@ -436,14 +388,11 @@ struct WyrdSyntax {
             }
             return *this;
         }
-        ~RuleOrRef() {
-            //? Warning, may have to use pointers for consistent size?
-            //? Need to look into the needs of destructors for unions...
-        }
+        ~RuleOrRef() {}
 
         bool getIsRef() const noexcept { return _isRef; }
         Rule getRule() const noexcept { return !_isRef ? _rule : Rule(); }
-        RuleRef getRef() const noexcept 
+        RuleRef getRef() const noexcept
             { return _isRef ? _ref : RuleRef(); }
         std::vector<ParseResponse>&& operator()(CIter start, CIter end) {
             return _isRef ? _ref(start, end) : _rule(start, end);
@@ -484,14 +433,23 @@ struct WyrdSyntax {
          * by the RuleSet given a string's start and end positions.
          *
          * @param start The string iterator noting from where to start reading.
-         * @param end The string iterator noting the last possible read 
+         * @param end The string iterator noting the last possible read
          *            position.
          * @return The final ParseResponse summarizing the results of whichever
          *         single set of rules correspond to the given string.
          */
-        ParseResponse operator()(CIter start, CIter end) {
+        ParseResponse&& operator()(CIter start, CIter end) {
 
+            //Move in order through each of the rules we know about, testing
+            //them to see if they match the current substring. Return the
+            //first one that matches.
             for (RuleOrRef ror : _rules) {
+                //The single call for ror will result in nested calls to
+                //additional rors for each reference in the chain of rules.
+                //Each of those responses is aggregated into a slowly built
+                //up vector of responses that is passed to each preceding
+                //call as the process moves down the call stack. The resulting
+                //vector is a reverse-order sequence of references to a rule.
                 std::vector<ParseResponse> responses = ror(start, end);
 
                 ParseResponse response;
@@ -505,14 +463,17 @@ struct WyrdSyntax {
                     assert(0 && "Unknown rule set type from JSON");
                 }
 
-                if (response.success) {
-                    return response;
+                if (response.isSuccessful) {
+                    return std::move(response);
                 }
             }
+
+            //If none of the rules match, then return a failure state.
+            return ParseResponse();
         }
 
         const RuleSetType& getType() const noexcept { return _type; }
-        const std::vector<RuleOrRef>& getRules() const noexcept 
+        const std::vector<RuleOrRef>& getRules() const noexcept
             { return _rules; }
 
     private:
@@ -523,7 +484,7 @@ struct WyrdSyntax {
             ParseResponse pr(0, true);
             for (ParseResponse current : responses) {
                 pr.deltaPosition += current.deltaPosition;
-                pr.success &= current.success;
+                pr.isSuccessful &= current.isSuccessful;
             }
             return std::move(pr);
         }
@@ -534,7 +495,7 @@ struct WyrdSyntax {
             ParseResponse pr(0, false);
             for (ParseResponse current : responses) {
                 pr.deltaPosition += current.deltaPosition;
-                pr.success |= current.success;
+                pr.isSuccessful |= current.isSuccessful;
             }
             return std::move(pr);
         }
@@ -574,7 +535,7 @@ struct WyrdSyntax {
                     std::string name;
                     //iterator to "characters" reference for the rule.
                     json::iterator ruleDef;
-                    if ((ruleDef = rule.find("characterSet")) 
+                    if ((ruleDef = rule.find("characterSet"))
                         != rule.end()) {
 
                         //get character set name
@@ -585,7 +546,7 @@ struct WyrdSyntax {
                             RuleOrRef( Rule(_characterMap.at(name),c) )
                         );
                     }
-                    else if ((ruleDef = rule.find("rule")) 
+                    else if ((ruleDef = rule.find("rule"))
                         != rule.end()) {
 
                         //get rule name
@@ -598,7 +559,7 @@ struct WyrdSyntax {
                         );
                     }
                     else {
-                        assert(0 && 
+                        assert(0 &&
                             "Failed to get rule definition from json");
                     }
                 }
@@ -627,7 +588,7 @@ struct WyrdParser {
      * parse
      *
      * Parses a string based on the rules given from the syntax JSON data.
-     * Produces any object that can store string-like objects with a 
+     * Produces any object that can store string-like objects with a
      * push_back interface.
      *
      * @param toParse The string content to parse.
@@ -635,7 +596,7 @@ struct WyrdParser {
      * @return The DataOutput type resulting from the parse.
      */
     template <typename DataOutput = Tags>
-    static DataOutput parse(std::string toParse, 
+    static DataOutput parse(std::string toParse,
         std::string syntaxFileName) {
 
         std::ifstream syntaxFile(syntaxFileName.c_str());
@@ -661,7 +622,7 @@ struct WyrdParser {
                     break;
                 }
                 else {
-                    toReturnData.push_back(DataOutput::value_type(current, 
+                    toReturnData.push_back(DataOutput::value_type(current,
                         start+response._deltaPosition));
                     current = start + response._deltaPosition;
                 }
