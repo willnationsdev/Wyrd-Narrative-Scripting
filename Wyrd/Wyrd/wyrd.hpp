@@ -66,7 +66,7 @@ struct JsonUtility {
     /**
      * findWhere
      *
-     * Searches through an array-based JSON object "data" contains an
+     * Searches through a JSON array "data" for an
      * object with key "key" equal to value "val".
      *
      * @param data The JSON object to search through. Must be an array of
@@ -215,7 +215,7 @@ struct WyrdSyntax {
             //we AREN'T looking at this language's syntax. For all we know,
             //it could be.
             if (start == end) {
-                return { ParseResponse(0,true) };
+                return { std::move(ParseResponse(0,true)) };
             }
 
             //If we were unable to locate the valid character list,
@@ -617,16 +617,19 @@ struct WyrdParser {
         for (auto ruleSet : syntaxRules.getRuleSetMap()) {
             std::vector<WyrdSyntax::ParseResponse> responses;
             for (auto rule : ruleSet.second.getRules()) {
-                auto response = rule(current, end);
-                if (!response._success) {
-                    break;
+                auto responseList = rule(current, end);
+                for (auto response : responseList) {
+                    if (!response.isSuccessful) {
+                        break;
+                    }
+                    else {
+                        toReturnData.push_back(DataOutput::value_type(current,
+                            start+response.deltaPosition));
+                        current = start + response.deltaPosition;
+                    }
                 }
-                else {
-                    toReturnData.push_back(DataOutput::value_type(current,
-                        start+response._deltaPosition));
-                    current = start + response._deltaPosition;
-                }
-                responses.push_back(response);
+                responses.insert(responses.end(), responseList.begin(), 
+                    responseList.end());
             }
             for (auto iResponse = responses.crbegin();
                 iResponse != responses.crend(); ++iResponse) {

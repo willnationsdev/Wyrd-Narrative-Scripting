@@ -1,41 +1,17 @@
 {
   "syntax": {
-    "characterSets": [
-      {
-        "name": "prefixes",
-        "characters": "aeiou"
-      },
-      {
-        "name": "roots",
-        "characters": "mnpktlhsvwj"
-      },
-      {
-        "name": "particles",
-        "characters": "xzcfb"
-      },
-      {
-        "name": "vowels",
-        "characters": "aeiouyq"
-      },
-      {
-        "name": "expression",
-        "characters": ":"
-      },
-      {
-        "name": "endPunctuationMultiple",
-        "characters": ".!?"
-      },
-      {
-        "name": "endPunctuation",
-        "characters": ":"
-      },
-      {
-        "name": "midPunctuation",
-        "characters": ",\"'"
-      }
-    ],
-    "ruleSets": [
-      {
+    "characterSets": {
+      "prefixes": "aeiou",
+      "roots": "mnpktlhsvwj",
+      "particles": "xzcfb",
+      "vowels": "aeiouyq",
+      "expression": ";",
+      "endPunctuationMultiple": ".!?",
+      "endPunctuation": ":",
+      "midPunctuation": ",\"'"
+    },
+    "ruleSets": {
+      "prefixes": {
         "name": "prefixes",
         "id": 1,
         "type": "sequence",
@@ -50,7 +26,7 @@
           }
         ]
       },
-      {
+      "roots": {
         "name": "roots",
         "id": 2,
         "type": "sequence",
@@ -73,7 +49,7 @@
           }
         ]
       },
-      {
+      "particles": {
         "name": "particles",
         "id": 3,
         "type": "sequence",
@@ -88,7 +64,7 @@
           }
         ]
       },
-      {
+      "tags": {
         "name": "tags",
         "id": 4,
         "type": "any",
@@ -103,7 +79,7 @@
           }
         ]
       },
-      {
+      "expressions": {
         "name": "expressions",
         "id": 5,
         "type": "sequence",
@@ -118,7 +94,7 @@
           }
         ]
       },
-      {
+      "endPunctuationMultiple": {
         "name": "endPunctuationMultiple",
         "id": 6,
         "type": "sequence",
@@ -137,7 +113,7 @@
           }
         ]
       },
-      {
+      "endPunctuation": {
         "name": "endPunctuation",
         "id": 7,
         "type": "sequence",
@@ -156,7 +132,7 @@
           }
         ]
       },
-      {
+      "midPunctuation": {
         "name": "midPunctuation",
         "id": 8,
         "type": "sequence",
@@ -175,6 +151,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

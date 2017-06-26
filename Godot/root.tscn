@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+
+script/source = "extends Control
+
+var TWParser = preload(\"res://addons/Tokawaje/API/TWParser.gd\")
+var parser
+
+func _ready():
+	parser = TWParser.new()
+	print(parser.initialize(\"res://addons/Tokawaje/data/syntax.json\"))
+
+func _on_TextEdit_text_changed():
+	var obj = parser.parse($TextEdit.get_text())
+	if obj != null:
+		print(obj.get_group_array())
+	else:
+		print(\"Parse Failure: \"+$TextEdit.get_text())
+"
+
+[node name="root" type="Control"]
+
+margin_right = 450.0
+margin_bottom = 289.0
+rect_clip_content = false
+mouse_filter = 0
+script = SubResource( 1 )
+
+[node name="TextEdit" type="TextEdit" parent="."]
+
+margin_right = 1022.0
+margin_bottom = 599.0
+rect_clip_content = false
+mouse_filter = 0
+syntax_highlighting = false
+show_line_numbers = false
+highlight_all_occurrences = false
+caret_block_mode = false
+caret_blink = false
+caret_blink_speed = 0.65
+
+[connection signal="text_changed" from="TextEdit" to="." method="_on_TextEdit_text_changed"]
+
+
