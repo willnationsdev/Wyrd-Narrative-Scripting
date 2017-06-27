@@ -1,0 +1,200 @@
+Jamie Little's Questions
+
+Good afternoon Mr. Nations. Thanks again for the link to your development log. Work was a little crazy so this is my new day off for discussing your concept. 
+1 - I skimmed through some of the earlier entries and it sounds like I would have to learn a fictional language to play your game? Or does it attempt to auto translate? I wasn't quite sure if the example in the entry was an example of my input to the game vs it being what the game outputs or if it's my supposed interpretation of what the game would output.
+2 - The Archer - An effective Archer should have high levels of dexterity. High dexterity means high accuracy but that doesn't necessarily mean no archer should not have ninja reflexes. Kick dmg vs punch dmg. Strong upper body means little for kicking str. At one glance it seems like this could be fixed by making punch damage be a % of kick dmg etc. That doesn't work though because What about other races/species? A kick from a Trex is bound to hurt disproportionately more than his punch. What kinds of attributes do you plan to have for your game? Are you going to do the DND basic or will things be more nuanced?
+3 - Emotional baggage attached to topics – Will certain characters have certain feelings about different topics? I believe you wrote that they would at least in terms of organizations. If a character hates an organization then how is their disposition towards another character handled if they learn they are in that organization? Even after they’ve traveled awhile already? If they meet enough people from that organization that they really like will that soften their views of that organization even if their leader is still terrible? How nuanced does this get? If you won’t stop brining up topics that they dislike will they begin to dislike you? The opposite with topics they do like?
+4 - Relationship definition - (What procedurally defines a friend vs. a love interest vs. family) In your example you made it clear that a character's relationship with you can change but is that solely dependent on your choices? What makes an acquaintance into a work buddy or a college pal as opposed to friends or best friends or romantic interests? Do you compare traits to some idealized list of things this character would look for in the role of a friend, role model, girlfriend, coworker, or employee?
+5 - Dealing with world knowledge - (procedurally defining who knows what to what degree and if it is correct.) If a character witnesses you murder someone or sneaking around but you're in a disguise will they be able to tell other npc's this rumor that they saw someone of x build, y height, wearing a bearskin rug, and a mask doing this thing with a certain special technique and a certain twitch. Will some NPC's be able to observe that you own everything to match that description at your leisure and be suspicious?
+6 – How much information can a character know? How do you decide what a character should know? If you ask this character a question about swords will they have a strong base of knowledge or highly specific knowledge to specific aspects of the topic like the material selection process for creating Japanese swords? Or the history of European sword designs? Is this based on a number being greater than X? What about for regional information? How do you stop a traveler with high knowledge related to baking from knowing everything about a secret family cookie recipe before he even gets into town? Or if he’s into history from knowing every detail of a small inconsequential towns history that he gets stranded in. This is a small matter and could be dismissed by saying that being interested in such would lead him to researching thusly but that doesn’t seem right. Should you create further conditions then for knowing information? What kinds of conditions?
+7 - It sounds like the characters aren't fully defined at introduction. Okay so you meet Megumine like in your example. She's an adventurer. This statement carries with it an assumption that that she slays monsters. When the system later decides that she's anemic it makes her being an adventurer make less sense as she is down the most effective way of resolving a situation. In order for her to be an adventurer it would imply that she has to be extraordinarily skilled to win some other way. That she is able to speak all languages to be all persuasive? If that was true then what does it mean for past encounters where this may have been helpful? Did the system decide she was anemic after she'd already killed monsters in several encounters? It sounds like this will be complicated and I’m curious about how you would resolve this potential and probably already solved issue.
+8 - How far are you going to define these characters? Are you taking into account things like damage by area, or how a character's strength may be lessened if their arm gets cut off? How their accuracy is effected if you hit them in the eye unless they have some 6th sense etc. What about needs like hunger/sleep/blood% or phobias and fetishes. Would a character giver preferential treatment to a blonde or a red head? How powerful are their senses? Can they see or hear better than another race? what about in different circumstances like in darkness or when submerged? Will you be tracking what emotions a particular character is experiencing and how they will affect their interactions or choices? What sets them off? Are you tracking religous/political/economic beliefs? what their different Philosophies might be? Some of these are more or less important based on if they are a king, priest, or peasent.  What if the character is cursed like a vampire or a werewolf? Mental disorders? Damage types?
+9 – How many viable ways of resolving an encounter are you planning for? Will you be able to intimidate someone into surrendering? If so then how would the appearance of your gear, performance in combat, and reputation play into it? How is it affected if you’re in the context of a big battle and their side has more people? Would they all surrender? Would you get a random encounter battle only to have everyone surrender on the first turn?
+10 - If you meet a character and then part ways they surely aren't gone forever. If you go back to visit them months later will they have higher stats? What happens if you ask them about what they've been doing since then?
+11 - I'm working with a team on a project as a 2d artist and have very little experience with programming. For this project as I contemplate things further the amount of variables and dependencies are staggering and i'm curious about how you plan to structure all of this information. You seem to have the proper training for this kind of thing to know what you're getting yourself into. Myself on the other hand I get the impression this is considerably more variables than most games keep track of and have to wonder if things are being pushed too far or if there’s a special and easy way of organizing it to make it run faster.
+12 – If you get into a possession situation where there is another person controlling your body then would your companion notice you acting strangely? To do this wouldn’t you have to create a baseline of characteristics that this character believes apply towards you such as the virtue of kindness to notice if you were being oddly detached?
+
+These questions are some of the road bumps I’ve been considering in my own project. I feel like I’ve figured out some of them while others I’ve just benched to figure out later. I like the innovation with your scripting language and am curious to see how you’d answer these.
+FRI 11:03AM
+
+James Lillie
+James
+13 - If you have a character with multiple personalities but nobody knows they have multiple personalities then how does the data structure for their relationships work? Can you structure it so that all of a friends experiences go into the same structure until they learn about the other personalities and then split them into different structures? Will they really not judge the other personalities by the actions of one?
+
+-------------------------------------------------------------------------------
+Answers
+
+1 - I am primarily trying to build a back-end engine that would enable a variety of forward-facing formats.
+For example, I am designing the vocabulary in mind such that any given line in the Dictionary tab could
+conceivably have the same hieroglyph assigned to it and each hieroglyph would directly be translatable to
+a set of letters representing the concept (the "=cvc:" in the left-hand column).
+
+Applications could EVENTUALLY be written to translate English or some other language into tokawaje on the fly,
+but that is absolutely NOT what I'm interested in working on. I imagine people interacting with applications
+powered by a tokawaje narrative engine in one of the following ways.
+
+* People use a keyboard to directly type in the latin-based alphabet to compose the phonetics, as one would
+in English.
+
+* People select the images of hieroglyphs in a menu to insert them into a phrase (as one does with some Asian
+digital writing systems). They then do a secondary click or swipe motion to select a 
+spectrum/positive/neutral/negative meaning.
+
+* People draw images on a tablet/phone that are guessed as one of the hieroglyphs assigned to a spectrum and
+follow up with the same click/swipe activity to denote the word precision as in the previous case. This too
+is like if you used the Chinese language app on an iPhone, for instance.
+
+* People speak tokawaje to a speech-to-text interface that would translate pronounced words directly into
+alphabetic tokawaje which would be displayed to the user in either alphabetic or hieroglyphic form.
+
+^ Cases that use hieroglyphs essentially just obscure the fact that, under the hood, the hieroglyphs are
+translated into phonetic characters put through the tokawaje parser/interpreter.
+
+Yes, people WOULD have to learn a "fictional" language in order to play the game, but it is my wish that this
+language would become something that is common to a variety of games and would become very "real" in its
+utility, even outside of game development.
+
+tokawaje isn't even something that people would necessarily only use while in-game. I would wish to design
+game experiences that are powered by systems primarily, systems that read in tokawaje information and then
+employ logic to write/design the logic/layout of the world and gameplay. This system would allow tokawaje to
+be used not only for narrative design, but typical game scripting as well. Rather than describing activities
+in a programmatic way, however, you would simply describe WHAT you want the behavior to be, and the engine
+would then make a programming guess as to what you want to do. The reason this could work is because the
+language itself allows for complete flexibility in how specific you wish to be when describing objects/behavior.
+
+If I built a narrative engine of this sort and then opened it up to people with 1 or 2 sample games, the amount
+of modding that could occur would be explosive and could completely revolutionize the industry, much like what
+Minecraft has done.
+
+2 - As far as what I would do for my own game, I'm not too sure yet. I'd probably just go with DND basics of
+some sort (if I wanted to distinguish between punches/kicks or different species' melee attacks, that'd be
+easy enough with tokawaje: there's a word for arm and a word for leg; there's a word for human/humanoid/beast,
+and a specific species could be indicated using a proper name prefix tag of "fa" or "fo" which I recently added).
+
+I can communicate precise percentages and assign percentage relationships if I wish:
+"ufe aseje efe." => "something is a percentage of something."
+"ufe aseje imetawiva efe." => "something is 41% of something."
+
+I can also differentiate between ranged weapon accuracy and high dodgability:
+"ukenahisi usomowana itulaze ivytalajo" <- being REALLY specific
+The (centering-capacity of the desired destination) relating to (tools of long-range conflict).
+"uxakena itawalijo atuso etulazejyla"
+The capacity of moving flexibly so as to prevent oneself from touching harmful tools. (i.e. weapons)
+
+In a game I made, these would be abbreviated as entities in the game and then the explicit properties that arise
+from possessing this "entity" would be explained in tokawaje as well. The game's narrative engine could take that
+text and interpret the narrative capabilities of the character and the game's gameplay engine (such as UE4) would
+then be scripted to understand what those properties translated into, gameplay wise:
+"akotitata" // "to direct something precisely" (for the narrative engine)
+  * itulaze ivytalajo uxo avela eseje imetawiva // "has 41% chance to hit with ranged weapons" (for the game engine)
+"atawalijo" => "to move fluidly" (for the narrative engine)
+  * akena atuso etulazejyla uxo avela eseje imetawiva //(for the narrative engine and game engine)
+                                              //has 41% chance of evading tool-based attacks
+^ Could additionally specify all sorts of distinctions between seen/unseen, magic/divine/normal, etc.
+If you wanted to say how many points were invested into something: "uxo avela evala imetawiva" => 41 value/points
+
+3 - Pretty much yes to everything here. I plan on making the characters' personality reactions as realistic as possible
+while also ensuring that they only react to things that are relevant to the narrative. It will end up working similarly
+to the "Passion" system that Ken Levine theorized about (and that Thomas Henshell is employing on some level in 
+Archmage Rises), only, my content would ideally be intertwined with a core-defined narrative AI that is "running" the
+story in the background.
+
+4 - Yeah, you actually got it here. If Person A expects a friend/girlfriend/coworker/whatever to act in X way, and
+someone does that, then they will begin to think of that person as having that sort of relationship with them. The fact
+that characters can have drastically different ideas about this is what can result in oh-so-many awkward interactions
+between people. In addition, the commonalities of people's expectations can result in there being "standard" ways of
+thought about this sort of thing. This can lead to a minority of people that have absurd expectations for things and
+it would end up reflecting ACTUAL humans quite well in that regard.
+
+5 - Yes. Any obtained Lore that a person learns to know is something that they will be able to communicate with certainty
+to another Character. They can only be as truthfully certain as circumstances permit, however. If they have bad eyesight
+and it was dark, then the number of details they might notice is scarce. On the other hand, they may be able to be
+overconfident and end up communicating things that they misremembered. They could even intentionally lie if they so chose.
+
+6 - This is all defined by whatever modders want to define. When I make my own game, I'd probably keep things very abstract
+at first. "Do you know how to make swords? Can you explain it to me?" "Yes, you get the metal materials, heat it up, bend
+it into shape, make the edge more acute/sharp, and then allow it to cool." <- something like that.
+The thing is, you'd only ever have to come up with this sort of knowledge if people actually need to communicate that
+information. If you don't wanna narratively define that detailed material, you can just leave it at, "swords (and other
+metal-based weapons like it) require metal, heat, and tools to be made." If someone asks how, you just leave it at that
+level of detail. You could even have character come in, and say, "Here, I'll show you." and any graphics the game have
+would just show the associated icons for "heat", "man-made earth" and "tool" mixing around, maybe with some building SFX.
+The completed "sword" would then just be an icon with the "tool" image that has a detailed list of its narrative and gameplay
+properties.
+
+7 - Well, I think there is an assumption you are making that an "adventurer" by default slays monsters. In reality, the 
+concept is that people post issues that they are having, presumably involving monsters (but could be other things), and
+the "adventurer" deals with the problem, however they see fit. As such, the title of "adventurer" wouldn't necessarily
+preclude a character that is anemic. In addition, I brainstormed the possibility that such a character might resort to
+disabling, deceiving, or persuading enemies from being a problem. She could even be very adept at killing monsters, but
+perhaps she merely breaks their necks and watches them slump to the ground rather than roasting their skin off with flames
+and cowering as blood rushes up from their remaining, not fully burned flesh. At the time of the story, we didn't know 
+anything about this mage character, so we wouldn't have known anything about her abilities (so your question about past
+encounters isn't quite relevant). However, if events in the past have occurred that a player has become aware of, then
+the narrative engine would be responsible for knowing that the player is aware of that information and only editing things
+such that they would be consistent with what is already known by the player.
+
+8 - Again, these are all qualities that a modder would be able to control pretty clearly with tokawaje. On my part, I just
+plan on building characters that have a preference for doing things that follow their "Passions", i.e. what they "alyka" or
+"awana", etc. For any given character, you could then define WHAT it is they like/want, and to what degree (with something
+like "aseje"). The narrative engine would be able to procedurally generate things of this sort by mixing up a huge variety
+of defined entities like certain tools, sexes, communities, food, etc. Since the narrative engine would generate the same
+content that modders are able to edit, and since I plan to make the WAY the narrative engine generates content ALSO be 
+drawing from tokawaje, modders should have an unimaginably powerful capacity to alter the way characters are generated / 
+how they behave. Basically, every detail that you've covered here would be a part of that massive list of possible
+properties that can be assigned to a character, and each of those properties could in turn influence the degree to which
+generated likes/wants/needs/obligations/duties are followed by the character.
+
+9 - Yes, any of those possibilities are possible as well. I'd likely incorporate intimidation mechanics into my game on
+some level, and the degree to which one could employ / be affected by those mechanics would also be editable on the 
+scripting side of things.
+
+10 - If you leave a character, the narrative engine would need to make a decision as to whether they should bring the
+character back sooner or later. If sooner, then they may still have that character taking action that is relevant to 
+the current story, but just not tell the player about it. Those actions would still have consequences on the world, and
+the player may even learn later about the character's involvement in events that they experienced ("So that's where that
+random arrow came from! That thing saved me..."). On the other hand, if the narrative engine decides not to keep the
+character around, it would probably just get stored in the database until such time as the information was prompted to
+return to the story for whatever reason (either it just suddenly decides to bring the character back into the fold or
+the player may purposefully start searching for that character, etc.). Either way, once the character needs to be
+pulled from a database, that's when the engine would need to back-generate some excuse for what all the character had been
+doing, etc. It may even wait until the player asks the question before it generates the content. While it's whirring
+its algorithms, the character may take some sort of delaying action, like saying, "Hahaha, I've been reaaaaal busy."
+*ding, decided to involve the previous gang the player conquered.* "You know that gang we fought a while back? The Hand?"
+*whirring, ok, generated Hand-related conflict back-story.* "Well, I...[blah blah blah]."
+
+11 - I plan on relying on a graph-based database system called Neo4j in order to catalog the full range of worldbuilding
+definitions that the narrative engine will incorporate (obviously there is too much information to just have cached).
+That data would then be something that can be called up as needed. There would be one database associated with
+"permanent" content that is common to a set of games and then another database that is local to a particular story so 
+that the engine can store and serialize anything that needs to be saved or kept long-term in regards to the exact
+characters and events in THIS story, etc.
+
+12 - Yes, every character will build up "Lore" associated with the Objects and Life that they meet. With every observation,
+they would (ideally) be able to get a statistical "sense" of whether or not something is consistent. For THAT, we'd need
+machine learning algorithms which I am not very well versed in AT ALL, but will eventually need to learn about to build
+the sort of content I'm interested in. XD
+
+13 - Under the hood, different personalities would LITERALLY be different characters completely. The only difference being
+that sometimes one character inhabits a vessel and other times it doesn't. Doesn't mean that the Agent responsible for
+translating environment inputs stops generating instructions for a vessel (i.e. the Character can still "learn" things
+potentially. They could still think things). It's just that when the instruction for "say" is sent ("asawa"), then
+there is a null Vessel pointer at the other end, i.e. there is NOTHING that responds to that instruction, until such
+time as the Character regains active control of the Vessel. In this way, OTHER characters end up forming relationships
+specifically with a single character in the multiple-personality person (MPP). Some of these may be the same relationships.
+There may be a single Character object dedicated to interactions with the MPP, in which case, someone who doesn't know
+about the distinction, but is in a business relationship with both of them would have a certain nuance:
+
+Mike, an MPP, has another personality Joe.
+Mike begins a business relationship with Alex, an investor.
+Alex now has a business relationship with the MPP and with Mike. Let's also assume that, in this case, Joe is UNAWARE of
+the MPP reality. When Joe is now active, Alex still has a business relationship with the Mike-Joe MPP and with Mike, but
+not with Joe. Because when Alex observes the MPP he recognizes Mike, he calls out "Mike, hi!" Joe, now confused, asks,
+"me?" Alex laughs and begins talking business. Now, because Joe is being called a different name, and because this person
+is being so familiar with him, talking about things he has supposedly done, the narrative engine might be designed to start
+hinting to Joe that he may be an MPP, on a suspicion level. Joe still has no "Lore" understanding of him having a 
+business relationship with Alex though, so anything related to that sub-graph of knowledge is inaccessible to him, unless
+he somehow gains access to the shared MPP reservoir of information.
+
+Essentially, being an MPP would just mean that a subset of information is duplicated and saved in a communally understood
+way, that may or may not be communally recognized by all parties.

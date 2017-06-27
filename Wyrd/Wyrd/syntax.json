@@ -1,0 +1,156 @@
+{
+  "syntax": {
+    "characterSets": {
+      "prefixes": "aeiou",
+      "roots": "mnpktlhsvwj",
+      "particles": "xzcfb",
+      "vowels": "aeiouyq",
+      "expression": ";",
+      "endPunctuationMultiple": ".!?",
+      "endPunctuation": ":",
+      "midPunctuation": ",\"'"
+    },
+    "ruleSets": {
+      "prefixes": {
+        "name": "prefixes",
+        "id": 1,
+        "type": "sequence",
+        "set": [
+          {
+            "characterSet": "prefixes",
+            "condition": "1"
+          },
+          {
+            "rule": "tags",
+            "condition": "+"
+          }
+        ]
+      },
+      "roots": {
+        "name": "roots",
+        "id": 2,
+        "type": "sequence",
+        "set": [
+          {
+            "characterSet": "roots",
+            "condition": "1"
+          },
+          {
+            "characterSet": "vowels",
+            "condition": "1"
+          },
+          {
+            "characterSet": "roots",
+            "condition": "1"
+          },
+          {
+            "characterSet": "vowels",
+            "condition": "1"
+          }
+        ]
+      },
+      "particles": {
+        "name": "particles",
+        "id": 3,
+        "type": "sequence",
+        "set": [
+          {
+            "characterSet": "particles",
+            "condition": "1"
+          },
+          {
+            "characterSet": "vowels",
+            "condition": "1"
+          }
+        ]
+      },
+      "tags": {
+        "name": "tags",
+        "id": 4,
+        "type": "any",
+        "set": [
+          {
+            "rule": "roots",
+            "condition": "1"
+          },
+          {
+            "rule": "particles",
+            "condition": "1"
+          }
+        ]
+      },
+      "expressions": {
+        "name": "expressions",
+        "id": 5,
+        "type": "sequence",
+        "set": [
+          {
+            "characterSet": "expression",
+            "condition": "1"
+          },
+          {
+            "characterSet": "vowels",
+            "condition": "+"
+          }
+        ]
+      },
+      "endPunctuationMultiple": {
+        "name": "endPunctuationMultiple",
+        "id": 6,
+        "type": "sequence",
+        "set": [
+          {
+            "characterSet": "endPunctuationMultiple",
+            "condition": "+"
+          },
+          {
+            "characterSet": "endPunctuation",
+            "condition": "!"
+          },
+          {
+            "characterSet": "midPunctuation",
+            "condition": "!"
+          }
+        ]
+      },
+      "endPunctuation": {
+        "name": "endPunctuation",
+        "id": 7,
+        "type": "sequence",
+        "set": [
+          {
+            "characterSet": "endPunctuation",
+            "condition": "+"
+          },
+          {
+            "characterSet": "endPunctuationMultiple",
+            "condition": "!"
+          },
+          {
+            "characterSet": "midPunctuation",
+            "condition": "!"
+          }
+        ]
+      },
+      "midPunctuation": {
+        "name": "midPunctuation",
+        "id": 8,
+        "type": "sequence",
+        "set": [
+          {
+            "characterSet": "midPunctuation",
+            "condition": "+"
+          },
+          {
+            "characterSet": "endPunctuationMultiple",
+            "condition": "!"
+          },
+          {
+            "characterSet": "endPunctuation",
+            "condition": "!"
+          }
+        ]
+      }
+    }
+  }
+}
