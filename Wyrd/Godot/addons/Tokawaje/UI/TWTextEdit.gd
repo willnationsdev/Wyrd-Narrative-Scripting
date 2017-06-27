@@ -5,7 +5,7 @@ var parser
 
 func _ready():
 	parser = TWParser.new()
-	parser.initialize("")
+	parser.init("")
 	connect("text_changed", self, "on_text_changed")
 
 func on_text_changed():
