@@ -33,38 +33,7 @@ func get_root():
 
 # Recursive algorithm to acquire printable text of the entire tree's content
 func get_text():
-    # non-leaf tree
-    if children.size != 0:
-        var text
-        for child in children:
-            text += child.get_text()
-        return text
-
-    # leaf tree
-    else:
-        var word = current
-        if type == TW_TREE:
-            return ""
-        if type == TW_EXPR:
-            return expr
-        if type == TW_PUNC:
-            return punc
-        if type == TW_U:
-            for tag in u.tags:
-                word += tag
-            return 
-        if type == TW_A:
-            return 
-        if type == TW_E:
-            return 
-        if type == TW_O:
-            return 
-        if type == TW_UI:
-            return 
-        if type == TW_AI:
-            return 
-        if type == TW_EI:
-            return 
-        if type == TW_OI:
-            return 
-func 
+    var t = ""
+    for child in children:
+        t += child.get_text()
+    return t
