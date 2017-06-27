@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/Tokawaje/UI/TWTextEdit.gd" type="Script" id=1]
+
+[node name="root" type="Control"]
+
+margin_right = 40.0
+margin_bottom = 40.0
+rect_clip_content = false
+mouse_filter = 0
+
+[node name="TextEdit" type="TextEdit" parent="."]
+
+margin_right = 1023.0
+margin_bottom = 600.0
+rect_clip_content = false
+mouse_filter = 0
+syntax_highlighting = false
+show_line_numbers = false
+highlight_all_occurrences = false
+caret_block_mode = false
+caret_blink = false
+caret_blink_speed = 0.65
+script = ExtResource( 1 )
+
+
