@@ -18,4 +18,3 @@ var parent = null
 var children = []
 var type = TW_TREE
 var text = ""
-
