@@ -4,6 +4,8 @@
 # Derives from TokawajeNode
 extends preload("TokawajeNode")
 
+var TWNode = preload("TokawajeNode.gd")
+
 # Initializes the TokawajeTree.
 # p_parent: The parent TokawajeTree that owns this one. The root has parent == null
 func init(p_parent = null):
@@ -12,7 +14,7 @@ func init(p_parent = null):
 # Inserts a new node into the TokawajeTree.
 # p_text: The text containing the content of the node
 # p_type: The syntactic type of the node content
-# p_is_custom: 
+# p_is_custom: Whether the inserted word is a custom, non-Tokawaje term
 func insert(p_text = "", p_type = TW_TREE, p_is_custom = false):
     # Double check that we have a String
     if !(p_text is String):
@@ -24,10 +26,8 @@ func insert(p_text = "", p_type = TW_TREE, p_is_custom = false):
         print("Warning: TokawajeNode::insert(): p_is_custom is not bool! Returning null!")
         return null
     
-    var node = preload("TokawajeNode.gd").new()
-    node.type = p_type
-    node.text = p_text
-    node.parent = self
+    var node = TWNode.new()
+    node.init(self, p_type, p_text)
 
     if p_type == TW_EXPR || p_type == TW_PUNC:
         children.append(node)
