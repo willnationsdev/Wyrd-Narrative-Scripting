@@ -1,6 +1,8 @@
 extends preload("TokawajeNode")
 
+# "text" is an array of each parsed element of the context. Tags are stored as individual strings.
 const TW_INSERT_STRAT_TEXT      = 0
+# "text" is a string storing the entire context. Tags are stored as positions in text.
 const TW_INSERT_STRAT_POSITION  = 1
 
 # The first array gives a list of each individual element that falls into that category.
@@ -58,20 +60,45 @@ var o = []
 var mpunc = []
 var epunc = null
 
+# Recursively gather text content from child contexts and return text
 func get_text():
-    var t = ""
+    var start = true
+    var ret = ""
 
-func insert(p_text, p_strategy = ""):
-    # Retrieve the index at which this was added (if doesn't return index, then get size()-1)
-    var v_pos = text.append(p_text)
+    # for each element of this context
+    for t in text:
+
+        # Append spaces as necessary for readability.
+        if !start:
+            ret += " "
+        start = false
+
+        # Check if it's a string
+        if t is String:
+            # If it is, add it to our output.
+            ret += t
+        elif t is TWContext:
+            # Otherwise, add the inner context's text content.
+            ret += t.get_text()
+
+    return ret
+
+# Insert text into the 
+func insert(p_text, p_strategy = TW_INSERT_STRAT_TEXT):
+    if p_stragey == TW_INSERT_STRAT_TEXT && !(p_text is String):
+        print("Error: TokawajeContext::insert(): p_text is not a String")
+        return null
+
+    text.append(p_text)
     # Retrieve the first character
     var v_char = p_text.substr(0,1)
     if v_char == "u":
-        _insertIntoContext(v_pos, u)
+        _insertIntoContextText(p_text, u)
 
-func _insertIntoContext(p_pos, p_syntax_group):
+func _insertIntoContextText(p_text, p_syntax_group):
     p_syntax_group.append({
         pos=v_pos
     })
 
 func is_sentence():
+    return epunc != null || epunc != ""
