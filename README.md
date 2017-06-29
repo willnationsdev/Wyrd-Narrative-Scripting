@@ -13,10 +13,13 @@ Wyrd will encompass an AI and event system built on top of a custom scripting/co
 For now, the parser is simply using RegEx, but a more detailed C++ parser is a current long-term plan.
 
 To follow along with blog posts concerning the project, visit https://willnationsdev.wordpress.com/
+
 To view Twitch streams published for the project, please follow me at https://www.twitch.tv/willnationsdev
+
 For information on Tokawaje, the narrative scripting language, visit...
 
 Google Sheets Overview: https://docs.google.com/spreadsheets/d/1IHyghIiNCzRJ0Igq4GfW8x6qdQsN3DuWQ8tbBX1O2rA/edit?usp=sharing
+
 GitBooks Literature: https://www.gitbook.com/book/willnationsdev/tokawaje-the-spectral-language/details
 
 Current Status: Developing Godot Engine GDScript API
