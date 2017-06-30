@@ -53,10 +53,12 @@ var text = []
 # it's not terribly expensive to store them separately.
 # A C++ implementation in GDNative would be more efficient later.
 var expr = []
-var u = []
-var a = []
-var e = []
-var o = []
+var tags = {
+    u = [],
+    a = [],
+    e = [],
+    o = []
+}
 var mpunc = []
 var epunc = null
 
@@ -153,22 +155,29 @@ func insert(p_match):
 
     # Will need to compile the full word before adding it to the text
     var word = ""
-    var tags = []
 
     # Get the prefix
     var p = captures["prefix"]
     # If it's valid...
     if p != "":
-        # Collect all of the tags
+        var valid_tags = []
+        # Prepare insertion elements by cycling through each tag
         for tag_no in range(10):
             var tag = captures["tag"+tag_no]
             if tag != "":
-                tags.append(tag)
+                valid_tags.append(tag)
+
             else:
                 break
         
-        # Add the prefix to the word
-        word += p
+        # Add the word to our text
+        word += p                   # prefix
+        for i in valid_tags:
+            word += valid_text[i]
+        if captures["comma"] != "":
+            word += captures["comma"]
+        elif captures["punctuation"] != "":
+            word += captures["punctuation"]
 
         var elements = []
         for tag in tags:
@@ -178,23 +187,17 @@ func insert(p_match):
                 mods=[]
             })
 
-        var add_word = false
+            # TODO: double check this, need to check for i, etc.
         if logic_state & (TW_CONTEXT_LOGIC_AND | TW_CONTEXT_LOGIC_OR | TW_CONTEXT_LOGIC_XOR):
-            add_word = true
         # Add the tags to the appropriate member list
+            data[p].append([elements])
+        else:
+            data[p].back().append(elements)
         if p == "u":
-            # TODO: double check this
             if add_word:
                 u.append([elements])
             else:
                 u.back().append(elements)
-        elif p == "a":
-
-        elif p == "e":
-
-        elif p == "o":
-
-        elif p == "i":
 
 # Return whether this context encompasses a complete sentence, i.e. 
 # has a valid ending punctuation
