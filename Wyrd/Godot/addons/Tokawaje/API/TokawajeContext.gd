@@ -1,9 +1,6 @@
-extends preload("TokawajeNode")
+extends preload("TokawajeNode.gd")
 
-# "text" is an array of each parsed element of the context. Tags are stored as individual strings.
-const TW_INSERT_STRAT_TEXT      = 0
-# "text" is a string storing the entire context. Tags are stored as positions in text.
-const TW_INSERT_STRAT_POSITION  = 1
+var TWParser = preload("TokawajeParser.gd")
 
 # The first array gives a list of each individual element that falls into that category.
 # Expressions and middle-punctuation do not require any more than this.
@@ -17,7 +14,7 @@ const TW_INSERT_STRAT_POSITION  = 1
 
 # MIGHT NOT EVEN NEED THE "POS" VARIABLE?
 
-# akosa isysa, 'e omino?                    --> "(X) ate a lot, eh buddy?"
+# akosa isysa, ;e omino?                    --> "(X) ate a lot, eh buddy?"
 # 0     1    2 3  4    5 
 # 
 # expr =[ {text="e",pos=3} ]
@@ -51,7 +48,10 @@ const TW_INSERT_STRAT_POSITION  = 1
 # Stores each element in sequential order
 var text = []
 
-# Stores the positions of each element of a given type.
+# Stores the content of each element of a given type.
+# Given that each element is usually at most 4 characters,
+# it's not terribly expensive to store them separately.
+# A C++ implementation in GDNative would be more efficient later.
 var expr = []
 var u = []
 var a = []
@@ -59,6 +59,44 @@ var e = []
 var o = []
 var mpunc = []
 var epunc = null
+
+# Keeps track of the overall state of the context
+var logic_state = TW_CONTEXT_LOGIC_NULL
+var name_state = TW_CONTEXT_NAME_NULL
+var context_state = TW_CONTEXT_CONTEXT_NULL
+var mode_state = TW_CONTEXT_MODE_NULL
+
+# For logic states, when given a word with particle starting with "b"
+# Multiples can be maintained simultaneously, ergo, they are flags.
+enum {
+    TW_CONTEXT_LOGIC_NULL = 0,
+    TW_CONTEXT_LOGIC_AND =  1,
+    TW_CONTEXT_LOGIC_OR  =  2,
+    TW_CONTEXT_LOGIC_XOR =  4,
+    TW_CONTEXT_LOGIC_NOT =  8,
+    TW_CONTEXT_LOGIC_TO  = 16
+}
+
+# For name states, when given a word with particle starting with "f"
+enum {
+    TW_CONTEXT_NAME_NULL,
+    TW_CONTEXT_NAME_PROPER,
+    TW_CONTEXT_NAME_GENERIC
+}
+
+# For context states, when given a word with particle starting with "x"
+enum {
+    TW_CONTEXT_CONTEXT_NULL,
+    TW_CONTEXT_CONTEXT_OPEN,
+    TW_CONTEXT_CONTEXT_CLOSE,
+    TW_CONTEXT_CONTEXT_CLOSE_CASCADE
+}
+
+# For mode states, runnable once is_sentence == true
+enum {
+    TW_CONTEXT_MODE_NULL,
+    TW_CONTEXT_MODE_EXECUTABLE
+}
 
 # Recursively gather text content from child contexts and return text
 func get_text():
@@ -83,22 +121,85 @@ func get_text():
 
     return ret
 
-# Insert text into the 
-func insert(p_text, p_strategy = TW_INSERT_STRAT_TEXT):
-    if p_stragey == TW_INSERT_STRAT_TEXT && !(p_text is String):
-        print("Error: TokawajeContext::insert(): p_text is not a String")
+# Insert a RegExMatch into the context
+func insert(p_match):
+    if !(p_match is RegExMatch):
+        print("Error: TokawajeContext::insertMatch(): p_match is not a RegExMatch")
+        return null
+    
+    # Get the captured content from the match
+    var captures = p_match.get_name_dict()
+
+    # If anything is out of bounds, notify of syntax error
+    if captures["out_of_bounds"] != "":
+        _error_out_of_bounds(captures["out_of_bounds"])
         return null
 
-    text.append(p_text)
-    # Retrieve the first character
-    var v_char = p_text.substr(0,1)
-    if v_char == "u":
-        _insertIntoContextText(p_text, u)
+    # In all remaining cases, we will want to be appending content to our text.
 
-func _insertIntoContextText(p_text, p_syntax_group):
-    p_syntax_group.append({
-        pos=v_pos
-    })
+    # If we have a mode, then set the mode_state
+    var m = captures["mode"]
+    if m != "":
+        text.append(m)
+        if m == ":":
+            mode_state = TW_CONTEXT_MODE_EXECUTABLE
 
+    # If we have an expression, then just add the expression to our 
+    var e = captures["expression"]
+    if e != "":
+        text.append(e)
+        expr.append(e)
+        return self
+
+    # Will need to compile the full word before adding it to the text
+    var word = ""
+    var tags = []
+
+    # Get the prefix
+    var p = captures["prefix"]
+    # If it's valid...
+    if p != "":
+        # Collect all of the tags
+        for tag_no in range(10):
+            var tag = captures["tag"+tag_no]
+            if tag != "":
+                tags.append(tag)
+            else:
+                break
+        
+        # Add the prefix to the word
+        word += p
+
+        var elements = []
+        for tag in tags:
+            elements.append({
+                text=tag,
+                pos=text.size(),
+                mods=[]
+            })
+
+        var add_word = false
+        if logic_state & (TW_CONTEXT_LOGIC_AND | TW_CONTEXT_LOGIC_OR | TW_CONTEXT_LOGIC_XOR):
+            add_word = true
+        # Add the tags to the appropriate member list
+        if p == "u":
+            # TODO: double check this
+            if add_word:
+                u.append([elements])
+            else:
+                u.back().append(elements)
+        elif p == "a":
+
+        elif p == "e":
+
+        elif p == "o":
+
+        elif p == "i":
+
+# Return whether this context encompasses a complete sentence, i.e. 
+# has a valid ending punctuation
 func is_sentence():
-    return epunc != null || epunc != ""
+    return epunc != null || (epunc is String && epunc.size() > 0)
+
+func _error_out_of_bounds(p_out_of_bounds):
+    print("Error: TokawajeContext-SyntaxError: more than "+str(TWParser.NUM_TAGS)+" tags detected: "+p_out_of_bounds)

@@ -1,5 +1,9 @@
 extends Reference
 
+const NUM_TAGS = 10
+
+signal command_requested(text)
+
 var mode = ":"
 var prefix = "aeiou"
 var root = "mnptkshlvwj"
