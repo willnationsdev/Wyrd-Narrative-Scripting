@@ -1,8 +1,23 @@
+# Author: Will Nations
+# Date: 07/02/2017
+# 
+# TokawajeParser compiles and processes RegEx parsing on a given text segment.
+# It hides the existence RegEx objects from the TokawajeTree so that it can 
+# deal strictly with individual RegExMatch objects.
+#
+# Naming Convention:
+# Classes / Script-type variables: UpperCamelCase
+# Else: snake_case
+# [name] = public member variable or method, Script variables
+# _[name] = private member variable or method
+# i_[name] = iteration variable
+# p_[name] = parameter variable
+# v_[name] = local variable
+# r_[name] = local variable to return
+
 extends Reference
 
-const NUM_TAGS = 10
-
-signal command_requested(text)
+var TWTree = preload("TokawajeTree.gd")
 
 var mode = ":"
 var prefix = "aeiou"
@@ -13,42 +28,40 @@ var end_punc = ":;"
 var end_punc_mult = "\\.\\?!"
 var expression_prefix = ";"
 var comma = ","
-var expr = "(?P<mode>"+mode+")?(?P<expression>"+expression_prefix+"["+vowel+"]+)|\\b(?P<prefix>["+prefix+"])?(?P<tag0>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag1>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag2>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag3>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag4>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag5>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag6>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag7>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag8>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag9>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<pre_out_of_bounds>[^\\s"+comma+end_punc+end_punc_mult+"]+)?(?:(?P<comma>,)|(?P<punctuation>["+end_punc+"]|["+end_punc_mult+"]+))?(?P<post_out_of_bounds>[^\s]+)?"
-var regex
+var _expr = ""
+var _regex = null
 
 var path_to_json
-var TWTree = preload("TokawajeTree.gd")
 
-func init(p_path_to_json):
-    # not using pathToJson for now. Hardcoding.
-    regex = RegEx.new()
-    regex.compile(expr)
-    print(expr)
+# A reference to the text editor that will respond to any and all
+# parsing errors and warnings.
+var _text_editor
 
+func init(p_path_to_json, p_text_editor):
+    # not using path_to_json for now. Hardcoding.
+    _regex = RegEx.new()
     path_to_json = p_path_to_json
+    _text_editor = p_text_editor
+    print("Regex Compile: \n" + str(compile_regex()))
+    print("Regex Expression: \n" + _expr)
+
+func compile_regex():
+    _expr = "(?P<mode>^["+mode+"])?(?P<bad_mode>["+mode+"]+)?(?P<expression>"+expression_prefix+"["+vowel+"]+)|\\b(?P<prefix>["+prefix+"])?(?P<tag0>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag1>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag2>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag3>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag4>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag5>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag6>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag7>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag8>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag9>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<pre_out_of_bounds>[^\\s"+comma+end_punc+end_punc_mult+"]+)?(?:(?P<comma>,)|(?P<punctuation>["+end_punc+"]|["+end_punc_mult+"]+))?(?P<post_out_of_bounds>[^\\s]+)?|(?P<foreign>(?:[A-Z][a-z]+)+)?"
+    return _regex.compile(_expr)
 
 # Parses a segment of text into a TokawajeTree using RegEx
-func parse(p_content, p_fail_on_syntax_error):
+func parse(p_content):
+
     # Insantiation and initialization of TokawajeTree instance
-    var tree = TWTree.new()
-    TWTree.init()
+    var r_tree = TWTree.new().init(_text_editor)
+
     # Initial RegExMatch result
-    var parsed = regex.search(p_content)
-    # Declaring now so as to avoid re-allocations in the loop. To store RegExMatch captures
-    var captures = {}
-    # For cases where the user has flagged a subsequent word/context as non-Tokawaje text
-    var pass_on_syntax_check = false
+    var v_parsed = _regex.search(p_content)
 
-    while (parsed != null):
-        captures = parsed.get_names_dict()
+    # Pass each RegExMatch to the tree in turn, until there's nothing left.
+    while v_parsed != null:
+        r_tree.insert(v_parsed)
+        v_parsed = _regex.search(p_content, v_parsed.get_end())
 
-        if p_fail_on_syntax_error && !pass_on_syntax_check:
-            assert(captures["outOfBounds"] == "")
-        
-        if captures["prefix"] == "u":
-        tree.insert(parsed, TWTree.TW_U, false)
-
-        parsed = regex.search(p_content, parsed.get_end())
-
-    return tree
+    return r_tree
 
