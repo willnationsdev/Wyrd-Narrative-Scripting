@@ -170,8 +170,19 @@ var logic_states = {
 # For having reversible NOT's applied to the logic_state
 var logic_not = false
 
-func init(p_text_editor):
+# The context that contains this context, allowing us to move up the tree more easily.
+var parent_context = null
+
+# The part of speech of the last edited item.
+var last_edited_part_of_speech = null
+
+# Whether the last edit to this context was made to a modifier for a part of speech
+var is_last_edited_modifier = false
+
+func init(p_text_editor, p_parent_context = null):
     _text_editor = p_text_editor
+    parent_context = p_parent_context
+    return self
 
 # Recursively gather text content from child contexts and return text
 # Would just use .join(), but some array contents could be TWContext instances.
@@ -191,7 +202,7 @@ func get_text():
         if typeof(t) == TYPE_STRING:
             # If it is, add it to our output.
             ret += t
-        elif t is TWContext:
+        elif t is self.get_script():
             # Otherwise, add the inner context's text content.
             ret += t.get_text()
 
@@ -199,7 +210,6 @@ func get_text():
 
 func insert_mode(p_mode):
     text.append(p_mode)
-    mode_state = mode_mappings[p_mode]
     return self
 
 func insert_expression(p_expression):
@@ -216,7 +226,7 @@ func insert_expression(p_expression):
 func insert_concept(p_prefix, p_tags):
 
     # Officially add the word to our text
-    text.append( p_prefix + p_tags.join(" ") )
+    text.append( p_prefix + p_tags.join("") )
 
     # Preserve the original logic state in case of changes during this iteration
     var original_logic_states = {}
@@ -239,16 +249,18 @@ func insert_concept(p_prefix, p_tags):
             handle_particle_name(p_prefix, end)
 
     # Create elements for insertion into our tags
-    var elements = _build_tags()
+    var elements = _build_tag_elements()
 
     # If one of the logic states that relates different words to each other is used...
     # Add these tags separately and then reset the logic state
-    if original_logic_state != TW_CONTEXT_LOGIC_NULL:
-        _add_tags(p,elements,true)
+    if original_logic_states[p_prefix] != TW_LOGIC_NULL:
+        _add_tags(p_prefix,elements,true)
         # Clear the logic state
-        logic_state = TW_CONTEXT_LOGIC_NULL
+        logic_states[p_prefix] = TW_LOGIC_NULL
     else:
-        _add_tags(p,elements,false)
+        _add_tags(p_prefix,elements,false)
+    
+    return self
 
 # is_sentence()
 # 
@@ -262,19 +274,21 @@ func is_sentence():
 # Adds a list of tags to the corresponding tag-word dictionary
 # 
 # p_prefix:      Which section to put the tags under: u/a/e/o/i
-# p_tags:        The tags that need to be added
+# p_tags:        The array of tags that need to be added
 # p_is_new_word: Whether we are creating a new word (true) or adding these tags to the latest word (false)
 func _add_tags(p_prefix, p_tags, p_is_new_word = false):
     # Validate input
-    if typeof(p_prefix) != TYPE_STRING && typeof(p_tags) != TYPE_ARRAY && typeof(p_is_new_word) != TYPE_BOOL:
+    if typeof(p_prefix) != TYPE_STRING || typeof(p_tags) != TYPE_ARRAY || typeof(p_is_new_word) != TYPE_BOOL:
         return null
+    
+    if p_prefix == "i":
+        pass
+
     # If one of the logic states that relates different words to each other is used...
     # Add these tags separately.
     if p_is_new_word:
         # Create a new mapping of these tags to an empty list of modifiers.
-        var dict = {}
-        for tag in p_tags:
-            dict[tag] = []
+        var dict = _build_tag_elements(p_tags)
         # Add this mapping as another word-dictionary under this part of speech.
         tags[p_prefix].append(dict)
     else:
@@ -283,20 +297,23 @@ func _add_tags(p_prefix, p_tags, p_is_new_word = false):
         for tag in p_tags:
             tags[p_prefix].back()[tag] = []
 
-func _build_tags(p_tags):
+# _build_tag_elements()
+# 
+# Formats each tag as a dictionary with the tag mapped to a list of modifiers.
+# 
+# p_tags: The list of tags to be converted into storage elements for a context
+# 
+# return: The created storage tag elements
+func _build_tag_elements(p_tags):
     # Create elements for insertion into our tags
-    var v_tags = []
+    var v_tags = {}
     for tag in p_tags:
-        v_tags.append({
-            text=tag,
-            #pos=text.size(),
-            mods=[]
-        })
-    return dumps
+        v_tags[tag] = []
+    return v_tags
 
 # Add another context's content to this one, except for mode_state
 func absorb(p_context):
-    assert(p_context is TWContext)
+    assert(p_context is self.get_script())
 
     for t in p_context.text:
         text.append(t)
@@ -320,17 +337,17 @@ func _absorb_modifiers(p_keep_array, p_take_array):
 func handle_particle_logic(p_prefix, p_suffix):
     # "NOT" is the only logic state that can exist simultaneously with the others
     # Multiple NOTs will simply reverse each other
-    if end == "e":
+    if p_suffix == "e":
         logic_not = !logic_not
     # If we are using a different logic particle...
     # and if a logic state has already been assigned to the current word...
-    elif logic_states[p] != TW_CONTEXT_LOGIC_NULL:
+    elif logic_states[p_prefix] != TW_LOGIC_NULL:
         # notify that someone attempted to assign logic state logic_particles[end] to part of speech (prefix) p
         _text_editor.emit_signal("warning_multiple_logic_states", p_prefix, logic_particles[p_suffix])
     else:
         # we are encountering the first non-NOT logic particle for this word.
         # Set the logic_state using our mapping of particle suffix to logic value
-        logic_states[p] = logic_particles[end]
+        logic_states[p_prefix] = logic_particles[p_suffix]
 
 # handle_particle_context()
 # 
@@ -357,3 +374,12 @@ func register_name(p_name):
     elif name_state == TW_NAME_SPECIFIC:
         _text_editor.emit_signal("register_specific_name", p_name, self)
     return self
+
+func debug_string(p_indent):
+    pass
+    # var v_debug_string = ""
+    # v_debug_string += ""
+    # for i_subject_tag in tags[u].keys():
+    #     v_debug_string += tags[u]
+
+    # return v_debug_string

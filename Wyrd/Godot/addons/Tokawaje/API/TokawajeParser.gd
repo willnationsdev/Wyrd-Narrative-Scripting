@@ -46,7 +46,9 @@ func init(p_path_to_json, p_text_editor):
     print("Regex Expression: \n" + _expr)
 
 func compile_regex():
-    _expr = "(?P<mode>^["+mode+"])?(?P<bad_mode>["+mode+"]+)?(?P<expression>"+expression_prefix+"["+vowel+"]+)|\\b(?P<prefix>["+prefix+"])?(?P<tag0>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag1>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag2>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag3>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag4>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag5>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag6>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag7>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag8>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag9>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<pre_out_of_bounds>[^\\s"+comma+end_punc+end_punc_mult+"]+)?(?:(?P<comma>,)|(?P<punctuation>["+end_punc+"]|["+end_punc_mult+"]+))?(?P<post_out_of_bounds>[^\\s]+)?|(?P<foreign>(?:[A-Z][a-z]+)+)?"
+    #_expr = "(?P<mode>^["+mode+"])?(?P<bad_mode>["+mode+"]+)?(?P<expression>"+expression_prefix+"["+vowel+"]+)|\\b(?P<prefix>["+prefix+"])?(?P<tag0>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag1>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag2>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag3>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag4>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag5>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag6>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag7>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag8>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<tag9>(?:["+root+"]["+vowel+"]["+root+"]|["+particle+"])["+vowel+"])?(?P<pre_out_of_bounds>[^\\s"+comma+end_punc+end_punc_mult+"]+)?(?:(?P<comma>,)|(?P<punctuation>["+end_punc+"]|["+end_punc_mult+"]+))?(?P<post_out_of_bounds>[^\\s]+)?|(?P<foreign>(?:[A-Z][a-z]+)+)?"
+    #_expr = "(?P<mode>:)?(?P<expression>;[aeiouyq]+)|\\b(?P<prefix>[aeiou])(?P<tag0>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])(?P<tag1>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?P<tag2>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?<tag3>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?P<tag4>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?P<tag5>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?<tag6>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?P<tag7>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?P<tag8>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?<tag9>(?:[mnptkshlvwj][aeiouyq][mnptkshlvwj]|[zxcfb])[aeiouyq])?(?P<pre_out_of_bounds>[^\\s,:;\\.\\?!]+)?(?:(?P<comma>,)|(?P<punctuation>[:;]|[\\.\\?!]+))?(?P<post_out_of_bounds>[^\\s]+)?|(?P<foreign>(?:[A-Z][a-z]+)+)?"
+    _expr = "(?P<mode>:)?(?:[^s]*)(?P<expression>;[aeiouyq]+)?(?P<pre_out_of_bounds>[^\\s,:;\\.\\?!]+)?(?:(?P<comma>,)|(?P<punctuation>[:;]|[\\.\\?!]+))?(?P<post_out_of_bounds>[^\\s]+)?|(?P<foreign>(?:[A-Z][a-z]+)+)?"
     return _regex.compile(_expr)
 
 # Parses a segment of text into a TokawajeTree using RegEx
@@ -57,11 +59,12 @@ func parse(p_content):
 
     # Initial RegExMatch result
     var v_parsed = _regex.search(p_content)
+    print(v_parsed.get_name_dict())
 
     # Pass each RegExMatch to the tree in turn, until there's nothing left.
-    while v_parsed != null:
-        r_tree.insert(v_parsed)
-        v_parsed = _regex.search(p_content, v_parsed.get_end())
+#    while v_parsed != null:
+#        r_tree.insert(v_parsed)
+#        v_parsed = _regex.search(p_content, v_parsed.get_end())
 
     return r_tree
 

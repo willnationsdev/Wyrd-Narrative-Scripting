@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://addons/Tokawaje/UI/TWTextEdit.gd" type="Script" id=1]
+[ext_resource path="res://addons/Tokawaje/UI/TokawajeTextEdit.gd" type="Script" id=1]
 
 [node name="root" type="Control"]
 
@@ -22,5 +22,8 @@ caret_block_mode = false
 caret_blink = false
 caret_blink_speed = 0.65
 script = ExtResource( 1 )
+native_error_reporting = true
+fail_on_native_errors = true
+refresh_rate = 1.0
 
 

@@ -68,14 +68,22 @@ func initTimer():
 	self.add_child(_timer)
 	#connect("timeout", _timer, "on_timer_timeout")
 
-func _input_event(p_event):
-	if p_event.type == InputEvent.KEY:
-		if p_event.is_action_pressed("ui_accept"):
-			var v_parsed = parse_text()
-			print(v_parsed.get_text())
-			
-			#_timer.stop()
-			#highlight_text(parse_text())
+func _gui_input(p_event):
+    if p_event.is_action_pressed("ui_submit"):
+        print("Starting Evaluation")
+        var v_parsed = parse_text()
+        if v_parsed == null:
+            print("failed parse")
+            return
+        print(v_parsed.get_name())
+        v_parsed.debug_print()
+        #print(v_parsed.get_text())
+        
+        #_timer.stop()
+        #highlight_text(parse_text())
+        set_text("")
+        cursor_set_line(0)
+        cursor_set_column(0)
 
 func on_text_changed():
 	# Reset the timer whenever the user edits the text.
@@ -146,18 +154,18 @@ func _echo_warning_multiple_logic_states(p_prefix, p_suffix):
 
 func set_error_reporting_style(is_natively_reporting = false, is_failing_on_errors = false):
 	native_error_reporting = is_natively_reporting
-    if err:
-        connect("error_pre_out_of_bounds",      self, "_error_pre_out_of_bounds")
-        connect("error_post_out_of_bounds",     self, "_error_post_out_of_bounds")
-        connect("error_multiple_modes",         self, "_error_multiple_modes")
-        connect("error_no_prefix",              self, "_error_no_prefix")
-        connect("error_concept_insertion_failure", self, "_error_concept_insertion_failure")
-    else:
-        disconnect("error_pre_out_of_bounds")
-        disconnect("error_post_out_of_bounds")
-        disconnect("error_multiple_modes")
-        disconnect("error_no_prefix")
-        disconnect("error_concept_insertion_failure")
+	if native_error_reporting == true:
+		connect("error_pre_out_of_bounds",      self, "_error_pre_out_of_bounds")
+		connect("error_post_out_of_bounds",     self, "_error_post_out_of_bounds")
+		connect("error_multiple_modes",         self, "_error_multiple_modes")
+		connect("error_no_prefix",              self, "_error_no_prefix")
+		connect("error_concept_insertion_failure", self, "_error_concept_insertion_failure")
+	else:
+		disconnect("error_pre_out_of_bounds")
+		disconnect("error_post_out_of_bounds")
+		disconnect("error_multiple_modes")
+		disconnect("error_no_prefix")
+		disconnect("error_concept_insertion_failure")
 
 func is_natively_reporting():
 	return native_error_reporting
